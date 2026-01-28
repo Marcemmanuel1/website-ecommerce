@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 // Types pour une meilleure typage
 interface HeroSlide {
@@ -20,6 +22,7 @@ interface Product {
   image: string;
   isNew: boolean;
   isSale: boolean;
+  discountPercentage: number;
 }
 
 interface Category {
@@ -27,6 +30,7 @@ interface Category {
   name: string;
   count: number;
   image: string;
+  discountPercentage: number;
 }
 
 const Home = () => {
@@ -35,11 +39,21 @@ const Home = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
 
-  // État pour le slider des produits
-  const [currentProductSlide, setCurrentProductSlide] = useState(0);
-  const [isProductTransitioning, setIsProductTransitioning] = useState(false);
-  const productsPerPage = 4;
-  const totalProductSlides = Math.ceil(8 / productsPerPage); // Nous avons 8 produits
+  // État pour la section signature (scrolling sur desktop)
+  const [showScrollLeft, setShowScrollLeft] = useState(false);
+  const [showScrollRight, setShowScrollRight] = useState(true);
+
+  // État pour le slider des réductions (nouvelle section)
+  const [currentDiscountSlide, setCurrentDiscountSlide] = useState(0);
+  const [isDiscountTransitioning, setIsDiscountTransitioning] = useState(false);
+
+  // État pour le slider des catégories
+  const [currentCategorySlide, setCurrentCategorySlide] = useState(0);
+  const [isCategoryTransitioning, setIsCategoryTransitioning] = useState(false);
+
+  // État pour le slider des collections
+  const [currentCollectionSlide, setCurrentCollectionSlide] = useState(0);
+  const [isCollectionTransitioning, setIsCollectionTransitioning] = useState(false);
 
   // État pour le panier
   const [cartItems, setCartItems] = useState<number[]>([]);
@@ -50,7 +64,21 @@ const Home = () => {
 
   // Références pour les intervalles
   const sliderIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const productSliderIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const discountSliderIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const categorySliderIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const collectionSliderIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Références pour le scrolling horizontal
+  const signatureContainerRef = useRef<HTMLDivElement>(null);
+  const signatureProductsRef = useRef<HTMLDivElement>(null);
+
+  // Références pour le swipe mobile
+  const discountTouchStartX = useRef<number>(0);
+  const discountTouchEndX = useRef<number>(0);
+  const categoryTouchStartX = useRef<number>(0);
+  const categoryTouchEndX = useRef<number>(0);
+  const collectionTouchStartX = useRef<number>(0);
+  const collectionTouchEndX = useRef<number>(0);
 
   // Données des slides du hero
   const heroSlides: HeroSlide[] = [
@@ -77,7 +105,7 @@ const Home = () => {
       title: "L'ART DE L'ACCESSOIRE",
       subtitle: "Sculptez votre style",
       description: "Bijoux et accessoires qui racontent votre histoire",
-      image: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
+      image: "/hero-section-trois.png",
       buttonText: "EXPLORER",
       buttonLink: "/new-arrivals"
     }
@@ -89,41 +117,45 @@ const Home = () => {
       id: 1,
       name: "ROBE SCULPTURALE NOIR",
       category: "HAUTE COUTURE",
-      price: 12500,
-      originalPrice: 18000,
-      image: "https://images.unsplash.com/photo-1567095761054-7a02e69e5c43?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      price: 26600,
+      originalPrice: 38000,
+      image: "/robe-noir.jpg",
       isNew: true,
-      isSale: true
+      isSale: true,
+      discountPercentage: 30
     },
     {
       id: 2,
-      name: "BLOUSE SOIE NATURELLE",
+      name: "BLOUSE SOIE",
       category: "SIGNATURE",
       price: 22000,
       originalPrice: 22000,
-      image: "https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      image: "/blouse-soie.jpg",
       isNew: true,
-      isSale: false
+      isSale: false,
+      discountPercentage: 0
     },
     {
       id: 3,
-      name: "JUPE ARCHITECTURALE",
+      name: "JUPE",
       category: "AVANT-GARDE",
       price: 15500,
       originalPrice: 21000,
-      image: "https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      image: "/jupe.jpg",
       isNew: false,
-      isSale: true
+      isSale: true,
+      discountPercentage: 26
     },
     {
       id: 4,
-      name: "TALLAIRE SUR MESURE",
+      name: "SAC A MAIN",
       category: "EXCLUSIVITÉ",
       price: 35000,
       originalPrice: 35000,
-      image: "https://images.unsplash.com/photo-1624380741-811b28d0e8f2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      image: "/sac-a-main.jpg",
       isNew: false,
-      isSale: false
+      isSale: false,
+      discountPercentage: 0
     },
     {
       id: 5,
@@ -131,29 +163,32 @@ const Home = () => {
       category: "ACCESSOIRES",
       price: 28000,
       originalPrice: 35000,
-      image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      image: "/sac-en-cuir.jpg",
       isNew: true,
-      isSale: true
+      isSale: true,
+      discountPercentage: 20
     },
     {
       id: 6,
-      name: "PARURE OR 18K",
+      name: "CHAINE EN OR",
       category: "BIJOUX",
       price: 8500,
       originalPrice: 12000,
-      image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      image: "/parure-en-or.jpg",
       isNew: false,
-      isSale: true
+      isSale: true,
+      discountPercentage: 29
     },
     {
       id: 7,
-      name: "ESCARPINS ARCHITECTURAUX",
+      name: "ESCARPINS À TALONS",
       category: "CHAUSSURES",
       price: 32000,
       originalPrice: 40000,
-      image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      image: "/escarpins.jpg",
       isNew: true,
-      isSale: false
+      isSale: false,
+      discountPercentage: 20
     },
     {
       id: 8,
@@ -161,19 +196,59 @@ const Home = () => {
       category: "OUTERWEAR",
       price: 27500,
       originalPrice: 34000,
-      image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      image: "/veste.jpg",
       isNew: false,
-      isSale: true
+      isSale: true,
+      discountPercentage: 19
     }
   ];
 
-  // Catégories
-  const categories: Category[] = [
-    { id: 1, name: "HAUTE COUTURE", count: 24, image: "/haute-couture.jpg" },
-    { id: 2, name: "PRÊT-À-PORTER", count: 32, image: "/pret-a-porter.jpg" },
-    { id: 3, name: "ACCESSOIRES", count: 18, image: "/sac-accessoire.jpg" },
-    { id: 4, name: "BIJOUX", count: 45, image: "/bijoux.jpg" },
+  // Données des slides de réduction (comme hero section)
+  const discountSlides: HeroSlide[] = [
+    {
+      id: 1,
+      title: "SOLDES EXCEPTIONNELS",
+      subtitle: "Jusqu'à -70%",
+      description: "Profitez de réductions exclusives sur nos collections signature",
+      image: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
+      buttonText: "VOIR LES OFFRES",
+      buttonLink: "/sales"
+    },
+    {
+      id: 2,
+      title: "FIN DE COLLECTION",
+      subtitle: "Jusqu'à -50%",
+      description: "Pièces uniques à prix réduits, stocks limités",
+      image: "https://images.unsplash.com/photo-1445205170230-053b83016050?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
+      buttonText: "DÉCOUVRIR",
+      buttonLink: "/end-of-season"
+    },
+    {
+      id: 3,
+      title: "VENTE PRIVÉE",
+      subtitle: "Membres exclusifs",
+      description: "Accès anticipé aux réductions pour nos abonnés",
+      image: "/vente-privee.jpg",
+      buttonText: "DEVENIR MEMBRE",
+      buttonLink: "/membership"
+    }
   ];
+
+  // Catégories avec pourcentages de réduction
+  const categories: Category[] = [
+    { id: 1, name: "HAUTE COUTURE", count: 24, image: "/haute-couture.jpg", discountPercentage: 30 },
+    { id: 2, name: "PRÊT-À-PORTER", count: 32, image: "/pret-a-porter.jpg", discountPercentage: 25 },
+    { id: 3, name: "ACCESSOIRES", count: 18, image: "/sac-accessoire.jpg", discountPercentage: 40 },
+    { id: 4, name: "BIJOUX", count: 45, image: "/bijoux.jpg", discountPercentage: 35 },
+  ];
+
+  // Configuration des sliders mobiles
+  const categoriesPerSlide = 2;
+  const totalCategorySlides = Math.ceil(categories.length / categoriesPerSlide);
+
+  // Configuration du slider collections pour mobile
+  const collectionsPerSlide = 1;
+  const totalCollectionSlides = categories.length;
 
   // Fonction pour passer au slide suivant du hero
   const nextSlide = useCallback(() => {
@@ -191,6 +266,38 @@ const Home = () => {
     setTimeout(() => setIsTransitioning(false), 700);
   }, [isTransitioning, heroSlides.length]);
 
+  // Fonction pour passer au slide suivant des réductions
+  const nextDiscountSlide = useCallback(() => {
+    if (isDiscountTransitioning) return;
+    setIsDiscountTransitioning(true);
+    setCurrentDiscountSlide((prev) => (prev + 1) % discountSlides.length);
+    setTimeout(() => setIsDiscountTransitioning(false), 700);
+  }, [isDiscountTransitioning]);
+
+  // Fonction pour passer au slide précédent des réductions
+  const prevDiscountSlide = useCallback(() => {
+    if (isDiscountTransitioning) return;
+    setIsDiscountTransitioning(true);
+    setCurrentDiscountSlide((prev) => (prev - 1 + discountSlides.length) % discountSlides.length);
+    setTimeout(() => setIsDiscountTransitioning(false), 700);
+  }, [isDiscountTransitioning]);
+
+  // Fonction pour passer au slide suivant des collections
+  const nextCollectionSlide = useCallback(() => {
+    if (isCollectionTransitioning) return;
+    setIsCollectionTransitioning(true);
+    setCurrentCollectionSlide((prev) => (prev + 1) % totalCollectionSlides);
+    setTimeout(() => setIsCollectionTransitioning(false), 700);
+  }, [isCollectionTransitioning, totalCollectionSlides]);
+
+  // Fonction pour passer au slide précédent des collections
+  const prevCollectionSlide = useCallback(() => {
+    if (isCollectionTransitioning) return;
+    setIsCollectionTransitioning(true);
+    setCurrentCollectionSlide((prev) => (prev - 1 + totalCollectionSlides) % totalCollectionSlides);
+    setTimeout(() => setIsCollectionTransitioning(false), 700);
+  }, [isCollectionTransitioning, totalCollectionSlides]);
+
   // Fonction pour aller à un slide spécifique du hero
   const goToSlide = (index: number) => {
     if (isTransitioning || index === currentSlide) return;
@@ -199,34 +306,77 @@ const Home = () => {
     setTimeout(() => setIsTransitioning(false), 700);
   };
 
-  // Fonctions pour le slider des produits
-  const nextProductSlide = () => {
-    if (isProductTransitioning) return;
-    setIsProductTransitioning(true);
-    setCurrentProductSlide((prev) => (prev + 1) % totalProductSlides);
-    setTimeout(() => setIsProductTransitioning(false), 500);
+  // Fonction pour aller à un slide spécifique des réductions
+  const goToDiscountSlide = (index: number) => {
+    if (isDiscountTransitioning || index === currentDiscountSlide) return;
+    setIsDiscountTransitioning(true);
+    setCurrentDiscountSlide(index);
+    setTimeout(() => setIsDiscountTransitioning(false), 700);
   };
 
-  const prevProductSlide = () => {
-    if (isProductTransitioning) return;
-    setIsProductTransitioning(true);
-    setCurrentProductSlide((prev) => (prev - 1 + totalProductSlides) % totalProductSlides);
-    setTimeout(() => setIsProductTransitioning(false), 500);
+  // Fonction pour aller à un slide spécifique des collections
+  const goToCollectionSlide = (index: number) => {
+    if (isCollectionTransitioning || index === currentCollectionSlide) return;
+    setIsCollectionTransitioning(true);
+    setCurrentCollectionSlide(index);
+    setTimeout(() => setIsCollectionTransitioning(false), 700);
   };
 
-  const goToProductSlide = (index: number) => {
-    if (isProductTransitioning || index === currentProductSlide) return;
-    setIsProductTransitioning(true);
-    setCurrentProductSlide(index);
-    setTimeout(() => setIsProductTransitioning(false), 500);
+  // Fonctions pour le slider des catégories
+  const nextCategorySlide = () => {
+    if (isCategoryTransitioning) return;
+    setIsCategoryTransitioning(true);
+    setCurrentCategorySlide((prev) => (prev + 1) % totalCategorySlides);
+    setTimeout(() => setIsCategoryTransitioning(false), 500);
   };
 
-  // Fonction pour obtenir les produits du slide courant
-  const getCurrentProducts = () => {
-    const start = currentProductSlide * productsPerPage;
-    const end = start + productsPerPage;
-    return products.slice(start, end);
+  const prevCategorySlide = () => {
+    if (isCategoryTransitioning) return;
+    setIsCategoryTransitioning(true);
+    setCurrentCategorySlide((prev) => (prev - 1 + totalCategorySlides) % totalCategorySlides);
+    setTimeout(() => setIsCategoryTransitioning(false), 500);
   };
+
+  const goToCategorySlide = (index: number) => {
+    if (isCategoryTransitioning || index === currentCategorySlide) return;
+    setIsCategoryTransitioning(true);
+    setCurrentCategorySlide(index);
+    setTimeout(() => setIsCategoryTransitioning(false), 500);
+  };
+
+  // Fonctions pour le scrolling horizontal des produits signature
+  const scrollSignatureLeft = () => {
+    if (signatureContainerRef.current) {
+      const container = signatureContainerRef.current;
+      const scrollAmount = container.clientWidth * 0.8;
+      container.scrollBy({
+        left: -scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const scrollSignatureRight = () => {
+    if (signatureContainerRef.current) {
+      const container = signatureContainerRef.current;
+      const scrollAmount = container.clientWidth * 0.8;
+      container.scrollBy({
+        left: scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  // Fonction pour mettre à jour l'état des boutons de scroll
+  const updateScrollButtons = useCallback(() => {
+    if (signatureContainerRef.current) {
+      const container = signatureContainerRef.current;
+      const { scrollLeft, scrollWidth, clientWidth } = container;
+
+      setShowScrollLeft(scrollLeft > 10);
+      setShowScrollRight(scrollLeft + clientWidth < scrollWidth - 10);
+    }
+  }, []);
 
   // Gestion du slider automatique du hero
   const startHeroSlider = useCallback(() => {
@@ -240,17 +390,41 @@ const Home = () => {
     }, 5000);
   }, [nextSlide, isPaused]);
 
-  // Gestion du slider automatique des produits
-  const startProductSlider = useCallback(() => {
-    if (productSliderIntervalRef.current) {
-      clearInterval(productSliderIntervalRef.current);
+  // Gestion du slider automatique des réductions
+  const startDiscountSlider = useCallback(() => {
+    if (discountSliderIntervalRef.current) {
+      clearInterval(discountSliderIntervalRef.current);
     }
-    productSliderIntervalRef.current = setInterval(() => {
+    discountSliderIntervalRef.current = setInterval(() => {
       if (!isPaused) {
-        nextProductSlide();
+        nextDiscountSlide();
       }
-    }, 6000);
-  }, [nextProductSlide, isPaused]);
+    }, 5000);
+  }, [nextDiscountSlide, isPaused]);
+
+  // Gestion du slider automatique des catégories (mobile seulement)
+  const startCategorySlider = useCallback(() => {
+    if (categorySliderIntervalRef.current) {
+      clearInterval(categorySliderIntervalRef.current);
+    }
+    categorySliderIntervalRef.current = setInterval(() => {
+      if (!isPaused) {
+        nextCategorySlide();
+      }
+    }, 5000);
+  }, [nextCategorySlide, isPaused]);
+
+  // Gestion du slider automatique des collections (mobile seulement)
+  const startCollectionSlider = useCallback(() => {
+    if (collectionSliderIntervalRef.current) {
+      clearInterval(collectionSliderIntervalRef.current);
+    }
+    collectionSliderIntervalRef.current = setInterval(() => {
+      if (!isPaused) {
+        nextCollectionSlide();
+      }
+    }, 5000);
+  }, [nextCollectionSlide, isPaused]);
 
   // Gestion des pauses
   const handleMouseEnter = () => setIsPaused(true);
@@ -267,6 +441,75 @@ const Home = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [prevSlide, nextSlide]);
 
+  // Gestion du swipe pour réductions (mobile)
+  const handleDiscountTouchStart = (e: React.TouchEvent) => {
+    discountTouchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleDiscountTouchEnd = (e: React.TouchEvent) => {
+    discountTouchEndX.current = e.changedTouches[0].clientX;
+    handleDiscountSwipe();
+  };
+
+  const handleDiscountSwipe = () => {
+    if (!discountTouchStartX.current || !discountTouchEndX.current) return;
+
+    const distance = discountTouchStartX.current - discountTouchEndX.current;
+    const minSwipeDistance = 50;
+
+    if (distance > minSwipeDistance) {
+      nextDiscountSlide();
+    } else if (distance < -minSwipeDistance) {
+      prevDiscountSlide();
+    }
+  };
+
+  // Gestion du swipe pour catégories (mobile)
+  const handleCategoryTouchStart = (e: React.TouchEvent) => {
+    categoryTouchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleCategoryTouchEnd = (e: React.TouchEvent) => {
+    categoryTouchEndX.current = e.changedTouches[0].clientX;
+    handleCategorySwipe();
+  };
+
+  const handleCategorySwipe = () => {
+    if (!categoryTouchStartX.current || !categoryTouchEndX.current) return;
+
+    const distance = categoryTouchStartX.current - categoryTouchEndX.current;
+    const minSwipeDistance = 50;
+
+    if (distance > minSwipeDistance) {
+      nextCategorySlide();
+    } else if (distance < -minSwipeDistance) {
+      prevCategorySlide();
+    }
+  };
+
+  // Gestion du swipe pour collections (mobile)
+  const handleCollectionTouchStart = (e: React.TouchEvent) => {
+    collectionTouchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleCollectionTouchEnd = (e: React.TouchEvent) => {
+    collectionTouchEndX.current = e.changedTouches[0].clientX;
+    handleCollectionSwipe();
+  };
+
+  const handleCollectionSwipe = () => {
+    if (!collectionTouchStartX.current || !collectionTouchEndX.current) return;
+
+    const distance = collectionTouchStartX.current - collectionTouchEndX.current;
+    const minSwipeDistance = 50;
+
+    if (distance > minSwipeDistance) {
+      nextCollectionSlide();
+    } else if (distance < -minSwipeDistance) {
+      prevCollectionSlide();
+    }
+  };
+
   // Auto-slide du hero
   useEffect(() => {
     startHeroSlider();
@@ -277,24 +520,59 @@ const Home = () => {
     };
   }, [startHeroSlider]);
 
-  // Auto-slide des produits
+  // Auto-slide des réductions
   useEffect(() => {
-    startProductSlider();
+    startDiscountSlider();
     return () => {
-      if (productSliderIntervalRef.current) {
-        clearInterval(productSliderIntervalRef.current);
+      if (discountSliderIntervalRef.current) {
+        clearInterval(discountSliderIntervalRef.current);
       }
     };
-  }, [startProductSlider]);
+  }, [startDiscountSlider]);
+
+  // Auto-slide des catégories (mobile seulement)
+  useEffect(() => {
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) {
+      startCategorySlider();
+    }
+    return () => {
+      if (categorySliderIntervalRef.current) {
+        clearInterval(categorySliderIntervalRef.current);
+      }
+    };
+  }, [startCategorySlider]);
+
+  // Auto-slide des collections (mobile seulement)
+  useEffect(() => {
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) {
+      startCollectionSlider();
+    }
+    return () => {
+      if (collectionSliderIntervalRef.current) {
+        clearInterval(collectionSliderIntervalRef.current);
+      }
+    };
+  }, [startCollectionSlider]);
+
+  // Mise à jour des boutons de scroll lors du défilement
+  useEffect(() => {
+    const container = signatureContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', updateScrollButtons);
+      return () => container.removeEventListener('scroll', updateScrollButtons);
+    }
+  }, [updateScrollButtons]);
+
+  // Mise à jour initiale des boutons de scroll
+  useEffect(() => {
+    updateScrollButtons();
+  }, [updateScrollButtons]);
 
   // Fonction pour formater le prix
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(price);
-  };
-
-  // Fonction pour calculer la réduction
-  const calculateDiscount = (price: number, originalPrice: number) => {
-    return Math.round(((originalPrice - price) / originalPrice) * 100);
   };
 
   // Fonction pour ajouter au panier
@@ -311,7 +589,6 @@ const Home = () => {
 
   // Fonction pour rediriger vers la page détail
   const goToProductDetail = (productId: number) => {
-    // eslint-disable-next-line react-hooks/immutability
     window.location.href = `/detail?id=${productId}`;
   };
 
@@ -339,73 +616,15 @@ const Home = () => {
     border: '#e0e0e0'
   };
 
+  // Fonction pour gérer le clic sur le panier
+  const handleCartClick = () => {
+    alert(`Vous avez ${cartItems.length} articles dans votre panier`);
+  };
+
   return (
     <div className="min-h-screen bg-white">
-      {/* Header minimaliste avec icônes */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
-        <div className="container mx-auto px-8 py-6">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <h1 className="text-2xl tracking-widest font-light uppercase">
-              CAPRICE
-            </h1>
-
-            {/* Navigation */}
-            <nav className="hidden md:flex space-x-12">
-              {['Collections', 'Couture', 'Accessoires', 'Éditions', 'Studio'].map((item) => (
-                <a
-                  key={item}
-                  href={`/${item.toLowerCase()}`}
-                  className="text-sm tracking-widest uppercase hover:text-gray-600 transition-colors duration-300 relative group"
-                  style={{ color: colors.lightGray }}
-                >
-                  {item}
-                  <span className="absolute bottom-0 left-0 w-0 h-px bg-black group-hover:w-full transition-all duration-300"></span>
-                </a>
-              ))}
-            </nav>
-
-            {/* Icônes */}
-            <div className="flex items-center space-x-8">
-              <button
-                className="hover:text-gray-600 transition-colors"
-                aria-label="Rechercher"
-                style={{ color: colors.lightGray }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </button>
-
-              <button
-                className="hover:text-gray-600 transition-colors"
-                aria-label="Compte"
-                style={{ color: colors.lightGray }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </button>
-
-              <button
-                className="relative hover:text-gray-600 transition-colors"
-                onClick={() => alert(`Vous avez ${cartItems.length} articles dans votre panier`)}
-                aria-label="Panier"
-                style={{ color: colors.lightGray }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                {cartItems.length > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-black text-white text-xs h-5 w-5 flex items-center justify-center text-xs">
-                    {cartItems.length}
-                  </span>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Navbar */}
+      <Navbar cartItemsCount={cartItems.length} onCartClick={handleCartClick} />
 
       {/* Hero Section */}
       <section
@@ -437,7 +656,7 @@ const Home = () => {
                   </div>
                   <a
                     href={slide.buttonLink}
-                    className="inline-flex items-center border border-white px-12 py-4 text-white text-sm tracking-widest uppercase hover:bg-white hover:text-black transition-all duration-300 group"
+                    className="inline-flex items-center border rounded-[50px] border-white px-12 py-4 text-white text-sm tracking-widest uppercase hover:bg-white hover:text-black transition-all duration-300 group"
                   >
                     {slide.buttonText}
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-4 group-hover:translate-x-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -484,7 +703,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Section Collections */}
+      {/* Section Collections - SLIDER SUR MOBILE */}
       <section className="py-24">
         <div className="container mx-auto px-8">
           <div className="flex justify-between items-end mb-16">
@@ -505,7 +724,8 @@ const Home = () => {
             </a>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* Version desktop - Grid de 4 colonnes */}
+          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {categories.map((category) => (
               <a
                 key={category.id}
@@ -534,10 +754,88 @@ const Home = () => {
               </a>
             ))}
           </div>
+
+          {/* Version mobile - Slider */}
+          <div
+            className="md:hidden relative overflow-hidden"
+            onTouchStart={handleCollectionTouchStart}
+            onTouchEnd={handleCollectionTouchEnd}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            <div
+              className={`flex transition-transform duration-700 ease-in-out`}
+              style={{ transform: `translateX(-${currentCollectionSlide * 100}%)` }}
+            >
+              {categories.map((category) => (
+                <div key={category.id} className="w-full flex-shrink-0 px-4">
+                  <a
+                    href={`/categories/${category.name.toLowerCase()}`}
+                    className="group relative block overflow-hidden rounded-lg"
+                  >
+                    <div className="h-[400px] overflow-hidden">
+                      <img
+                        src={category.image}
+                        alt={category.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 p-8">
+                      <h3 className="text-2xl font-light text-white mb-2">{category.name}</h3>
+                      <p className="text-sm text-white/80 mb-4">{category.count} pièces</p>
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span className="inline-flex items-center text-white text-sm tracking-widest bg-black/50 px-4 py-2 rounded-full">
+                          Explorer la collection
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </span>
+                      </div>
+                    </div>
+                  </a>
+                </div>
+              ))}
+            </div>
+
+            {/* Navigation Collections Mobile */}
+            <button
+              onClick={prevCollectionSlide}
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 p-3 rounded-full hover:bg-white transition-colors duration-300 shadow-lg"
+              aria-label="Collection précédente"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+
+            <button
+              onClick={nextCollectionSlide}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 p-3 rounded-full hover:bg-white transition-colors duration-300 shadow-lg"
+              aria-label="Collection suivante"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+
+            {/* Indicateurs Collections Mobile */}
+            <div className="flex justify-center space-x-3 mt-8">
+              {categories.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => goToCollectionSlide(index)}
+                  className={`h-1.5 w-8 transition-all duration-300 rounded-full ${index === currentCollectionSlide ? 'bg-black' : 'bg-gray-300'
+                    }`}
+                  aria-label={`Aller à la collection ${index + 1}`}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Section Produits Signature - SLIDER */}
+      {/* Section Pièces Signature - SCROLLING HORIZONTAL SUR DESKTOP, SLIDER SUR MOBILE */}
       <section
         className="py-24"
         style={{ backgroundColor: colors.lightBg }}
@@ -554,131 +852,247 @@ const Home = () => {
                 Créations exclusives
               </p>
             </div>
-            <div className="flex items-center space-x-4">
+            <a
+              href="/products"
+              className="text-sm tracking-widest uppercase hover:text-gray-600 transition-colors hidden md:block"
+              style={{ color: colors.lightGray }}
+            >
+              Voir toutes les créations →
+            </a>
+          </div>
+
+          {/* Version desktop - Conteneur de scrolling horizontal */}
+          <div className="hidden md:block relative">
+            {/* Boutons de navigation desktop */}
+            {showScrollLeft && (
               <button
-                onClick={prevProductSlide}
-                className="p-2 hover:bg-gray-200 transition-colors duration-300"
-                aria-label="Produits précédents"
+                onClick={scrollSignatureLeft}
+                className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-4 z-10 bg-white hover:bg-gray-100 p-3 rounded-full shadow-lg transition-all duration-300"
+                aria-label="Défiler vers la gauche"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: colors.darkGray }}>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
+            )}
+
+            {showScrollRight && (
               <button
-                onClick={nextProductSlide}
-                className="p-2 hover:bg-gray-200 transition-colors duration-300"
-                aria-label="Produits suivants"
+                onClick={scrollSignatureRight}
+                className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-4 z-10 bg-white hover:bg-gray-100 p-3 rounded-full shadow-lg transition-all duration-300"
+                aria-label="Défiler vers la droite"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: colors.darkGray }}>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
-            </div>
-          </div>
+            )}
 
-          {/* Slider des produits */}
-          <div className="relative overflow-hidden">
+            {/* Conteneur de scrolling horizontal */}
             <div
-              className={`transition-transform duration-500 ease-in-out`}
+              ref={signatureContainerRef}
+              className="flex overflow-x-auto pb-8 gap-8 scrollbar-hide"
               style={{
-                transform: `translateX(-${currentProductSlide * 100}%)`
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+                cursor: 'grab'
               }}
+              onScroll={updateScrollButtons}
             >
-              <div className="flex">
-                {Array.from({ length: totalProductSlides }).map((_, slideIndex) => (
-                  <div key={slideIndex} className="w-full flex-shrink-0">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                      {products.slice(slideIndex * productsPerPage, slideIndex * productsPerPage + productsPerPage).map((product) => (
-                        <div
-                          key={product.id}
-                          className="bg-white group relative cursor-pointer"
-                          onClick={() => goToProductDetail(product.id)}
-                        >
-                          {/* Image Container */}
-                          <div className="relative overflow-hidden mb-4">
-                            <div className="h-[400px] overflow-hidden">
-                              <img
-                                src={product.image}
-                                alt={product.name}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                              />
-                            </div>
+              {products.map((product) => (
+                <div
+                  key={product.id}
+                  className="flex-shrink-0 w-80 bg-white group relative cursor-pointer"
+                  onClick={() => goToProductDetail(product.id)}
+                >
+                  {/* Image Container */}
+                  <div className="relative overflow-hidden mb-4">
+                    <div className="h-[400px] overflow-hidden">
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      />
+                    </div>
 
-                            {/* Badges */}
-                            <div className="absolute top-4 left-4 z-10">
-                              {product.isNew && (
-                                <span className="inline-block px-3 py-1 bg-white text-black text-xs tracking-widest uppercase">
-                                  Nouveau
-                                </span>
-                              )}
-                              {product.isSale && product.price < product.originalPrice && (
-                                <span className="inline-block px-3 py-1 bg-black text-white text-xs tracking-widest uppercase ml-2">
-                                  -{calculateDiscount(product.price, product.originalPrice)}%
-                                </span>
-                              )}
-                            </div>
+                    {/* Badges */}
+                    <div className="absolute top-4 left-4 z-10">
+                      {product.isNew && (
+                        <span className="inline-block px-3 py-1 bg-white text-black text-xs tracking-widest uppercase">
+                          Nouveau
+                        </span>
+                      )}
+                      {product.isSale && product.discountPercentage > 0 && (
+                        <span className="inline-block px-3 py-1 bg-black text-white text-xs tracking-widest uppercase ml-2">
+                          -{product.discountPercentage}%
+                        </span>
+                      )}
+                    </div>
 
-                            {/* Bouton ajouter au panier en haut à droite */}
-                            <button
-                              onClick={(e) => addToCart(product.id, e)}
-                              className="absolute top-4 right-4 z-10 p-2 bg-white/90 hover:bg-white transition-colors duration-300 opacity-0 group-hover:opacity-100"
-                              aria-label="Ajouter au panier"
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                              </svg>
-                            </button>
+                    {/* Bouton ajouter au panier en haut à droite */}
+                    <button
+                      onClick={(e) => addToCart(product.id, e)}
+                      className="absolute top-4 right-4 z-10 p-2 bg-white/90 hover:bg-white transition-colors duration-300 opacity-0 group-hover:opacity-100"
+                      aria-label="Ajouter au panier"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                    </button>
 
-                            {/* Overlay hover */}
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-                          </div>
+                    {/* Overlay hover */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+                  </div>
 
-                          {/* Product Info */}
-                          <div className="p-4">
-                            <p className="text-xs tracking-widest uppercase mb-2" style={{ color: colors.lightGray }}>
-                              {product.category}
-                            </p>
-                            <h3 className="text-lg font-light mb-3 group-hover:text-gray-600 transition-colors" style={{ color: colors.darkGray }}>
-                              {product.name}
-                            </h3>
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <span className="text-lg" style={{ color: colors.darkGray }}>
-                                  {formatPrice(product.price)}
-                                </span>
-                                {product.isSale && product.price < product.originalPrice && (
-                                  <span className="ml-2 text-sm line-through" style={{ color: colors.lightGray }}>
-                                    {formatPrice(product.originalPrice)}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                  {/* Product Info */}
+                  <div className="p-4">
+                    <p className="text-xs tracking-widest uppercase mb-2" style={{ color: colors.lightGray }}>
+                      {product.category}
+                    </p>
+                    <h3 className="text-lg font-light mb-3 group-hover:text-gray-600 transition-colors" style={{ color: colors.darkGray }}>
+                      {product.name}
+                    </h3>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-lg" style={{ color: colors.darkGray }}>
+                          {formatPrice(product.price)}
+                        </span>
+                        {product.isSale && product.price < product.originalPrice && (
+                          <span className="ml-2 text-sm line-through" style={{ color: colors.lightGray }}>
+                            {formatPrice(product.originalPrice)}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Style pour cacher la scrollbar mais garder le scroll */}
+            <style jsx>{`
+              .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+              }
+              .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+              }
+            `}</style>
+          </div>
+
+          {/* Version mobile - Slider (1 par slide) */}
+          <div className="md:hidden">
+            <div className="relative overflow-hidden">
+              <div className={`flex transition-transform duration-500 ease-in-out`}
+                style={{ transform: `translateX(-${currentCollectionSlide * 100}%)` }}>
+                {products.map((product) => (
+                  <div key={product.id} className="w-full flex-shrink-0 px-2">
+                    <div
+                      className="bg-white group relative cursor-pointer"
+                      onClick={() => goToProductDetail(product.id)}
+                    >
+                      {/* Image Container */}
+                      <div className="relative overflow-hidden mb-3">
+                        <div className="h-[400px] overflow-hidden">
+                          <img
+                            src={product.image}
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                          />
+                        </div>
+
+                        {/* Badges */}
+                        <div className="absolute top-4 left-4 z-10">
+                          {product.isNew && (
+                            <span className="inline-block px-3 py-1 bg-white text-black text-xs tracking-widest">
+                              Nouveau
+                            </span>
+                          )}
+                          {product.isSale && product.discountPercentage > 0 && (
+                            <span className="inline-block px-3 py-1 bg-black text-white text-xs tracking-widest ml-2">
+                              -{product.discountPercentage}%
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Bouton ajouter au panier */}
+                        <button
+                          onClick={(e) => addToCart(product.id, e)}
+                          className="absolute top-4 right-4 z-10 p-2 bg-white/90 hover:bg-white transition-colors duration-300"
+                          aria-label="Ajouter au panier"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                          </svg>
+                        </button>
+                      </div>
+
+                      {/* Product Info */}
+                      <div className="p-4">
+                        <p className="text-xs tracking-widest uppercase mb-2" style={{ color: colors.lightGray }}>
+                          {product.category}
+                        </p>
+                        <h3 className="text-lg font-light mb-2 group-hover:text-gray-600 transition-colors" style={{ color: colors.darkGray }}>
+                          {product.name}
+                        </h3>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="text-lg" style={{ color: colors.darkGray }}>
+                              {formatPrice(product.price)}
+                            </span>
+                            {product.isSale && product.price < product.originalPrice && (
+                              <span className="ml-2 text-sm line-through" style={{ color: colors.lightGray }}>
+                                {formatPrice(product.originalPrice)}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Navigation Mobile */}
+              <button
+                onClick={prevCollectionSlide}
+                className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/80 p-2 rounded-full hover:bg-white transition-colors duration-300"
+                aria-label="Produits précédents"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+
+              <button
+                onClick={nextCollectionSlide}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/80 p-2 rounded-full hover:bg-white transition-colors duration-300"
+                aria-label="Produits suivants"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+
+              {/* Indicateurs Mobile */}
+              <div className="flex justify-center space-x-2 mt-6">
+                {products.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => goToCollectionSlide(index)}
+                    className={`h-1 w-8 transition-all duration-300 ${index === currentCollectionSlide ? 'bg-black' : 'bg-gray-300'}`}
+                    aria-label={`Aller au produit ${index + 1}`}
+                  />
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Indicateurs du slider produit */}
-          <div className="flex justify-center space-x-2 mt-12">
-            {Array.from({ length: totalProductSlides }).map((_, index) => (
-              <button
-                key={index}
-                onClick={() => goToProductSlide(index)}
-                className={`h-px w-8 transition-all duration-300 ${index === currentProductSlide ? 'bg-black' : 'bg-gray-300'}`}
-                aria-label={`Aller au slide produit ${index + 1}`}
-              />
-            ))}
-          </div>
-
           <div className="text-center mt-16">
             <a
               href="/products"
-              className="inline-block border border-black px-12 py-4 text-sm tracking-widest uppercase hover:bg-black hover:text-white transition-colors duration-300"
+              className="inline-block border rounded-[50px] border-black px-12 py-4 text-sm tracking-widest uppercase hover:bg-black hover:text-white transition-colors duration-300"
             >
               Voir toutes les créations
             </a>
@@ -686,42 +1100,57 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Section Réductions - Slider comme hero section */}
       <section
         className="relative"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <div className="relative h-[70vh]">
-          {heroSlides.map((slide, index) => (
+        <div className="relative h-[70vh] overflow-hidden"
+          onTouchStart={handleDiscountTouchStart}
+          onTouchEnd={handleDiscountTouchEnd}>
+          {discountSlides.map((slide, index) => (
             <div
               key={slide.id}
-              className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100' : 'opacity-0'}`}
+              className={`absolute inset-0 transition-opacity duration-1000 ${index === currentDiscountSlide ? 'opacity-100' : 'opacity-0'}`}
               style={{
-                backgroundImage: `linear-gradient(to right, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.5)), url(${slide.image})`,
+                backgroundImage: `linear-gradient(to right, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.4)), url(${slide.image})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat'
               }}
             >
               <div className="container mx-auto px-8 h-full flex items-center">
-                <div className="w-full">
+                <div className="max-w-2xl">
                   <div className="mb-8">
-                    <h2 className="text-5xl text-center md:text-7xl font-bold tracking-tight mb-6 text-white leading-none">
+                    <h2 className="text-4xl md:text-6xl font-light tracking-tight mb-6 text-white leading-none">
                       {slide.title}
                     </h2>
-                    <p className="text-xl text-center mb-8 text-white/80 font-light tracking-wide">
+                    <h3 className="text-3xl md:text-5xl font-bold mb-6 text-white">
+                      {slide.subtitle}
+                    </h3>
+                    <p className="text-xl mb-8 text-white/80 font-light tracking-wide">
                       {slide.description}
                     </p>
                   </div>
+                  <a
+                    href={slide.buttonLink}
+                    className="inline-flex items-center border rounded-[50px] border-white px-12 py-4 text-white text-sm tracking-widest uppercase hover:bg-white hover:text-black transition-all duration-300 group"
+                  >
+                    {slide.buttonText}
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-4 group-hover:translate-x-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </a>
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Navigation Hero */}
+        {/* Navigation Réductions */}
         <button
-          onClick={prevSlide}
+          onClick={prevDiscountSlide}
           className="absolute left-8 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 transition-colors duration-300"
           aria-label="Slide précédent"
         >
@@ -731,7 +1160,7 @@ const Home = () => {
         </button>
 
         <button
-          onClick={nextSlide}
+          onClick={nextDiscountSlide}
           className="absolute right-8 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 transition-colors duration-300"
           aria-label="Slide suivant"
         >
@@ -739,13 +1168,43 @@ const Home = () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5l7 7-7 7" />
           </svg>
         </button>
+
+        {/* Indicateurs Réductions */}
+        <div className="absolute bottom-12 left-8 flex flex-col space-y-2">
+          {discountSlides.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToDiscountSlide(index)}
+              className={`h-px w-8 transition-all duration-300 ${index === currentDiscountSlide ? 'bg-white' : 'bg-white/30'}`}
+              aria-label={`Aller au slide ${index + 1}`}
+            />
+          ))}
+        </div>
       </section>
 
-      {/* Section Collections */}
+      {/* Section Catégories avec pourcentages - Slider sur mobile */}
       <section className="py-10">
         <div className="container mx-auto px-8">
+          <div className="flex justify-between items-end mb-8">
+            <div>
+              <h2 className="text-3xl font-light tracking-tight mb-2" style={{ color: colors.darkGray }}>
+                Catégories en Promotions
+              </h2>
+              <p className="text-sm tracking-widest uppercase" style={{ color: colors.lightGray }}>
+                Jusqu'à -40% de réduction
+              </p>
+            </div>
+            <a
+              href="/categories"
+              className="text-sm tracking-widest uppercase hover:text-gray-600 transition-colors"
+              style={{ color: colors.lightGray }}
+            >
+              Tout voir →
+            </a>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* Version desktop - Grid */}
+          <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {categories.map((category) => (
               <a
                 key={category.id}
@@ -759,13 +1218,27 @@ const Home = () => {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+                  {/* Badge pourcentage */}
+                  {category.discountPercentage > 0 && (
+                    <div className="absolute top-4 right-4 z-10">
+                      <span className="inline-block px-4 py-2 bg-red-600 text-white text-sm tracking-widest uppercase">
+                        -{category.discountPercentage}%
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 p-8">
                   <h3 className="text-2xl font-light text-white mb-2">{category.name}</h3>
                   <p className="text-sm text-white/80">{category.count} pièces</p>
+                  {category.discountPercentage > 0 && (
+                    <p className="text-sm text-red-300 font-medium mt-1">
+                      Jusqu'à -{category.discountPercentage}% de réduction
+                    </p>
+                  )}
                   <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <span className="inline-flex items-center text-white text-sm tracking-widest">
-                      Explorer
+                      Voir les promotions
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5l7 7-7 7" />
                       </svg>
@@ -774,6 +1247,96 @@ const Home = () => {
                 </div>
               </a>
             ))}
+          </div>
+
+          {/* Version mobile - Slider */}
+          <div className="md:hidden relative overflow-hidden"
+            onTouchStart={handleCategoryTouchStart}
+            onTouchEnd={handleCategoryTouchEnd}>
+            <div className={`transition-transform duration-500 ease-in-out flex`}
+              style={{ transform: `translateX(-${currentCategorySlide * 100}%)` }}>
+              {Array.from({ length: totalCategorySlides }).map((_, slideIndex) => (
+                <div key={slideIndex} className="w-full flex-shrink-0">
+                  <div className="grid grid-cols-2 gap-4">
+                    {categories.slice(slideIndex * categoriesPerSlide, slideIndex * categoriesPerSlide + categoriesPerSlide).map((category) => (
+                      <a
+                        key={category.id}
+                        href={`/categories/${category.name.toLowerCase()}`}
+                        className="group relative overflow-hidden"
+                      >
+                        <div className="h-[250px] overflow-hidden">
+                          <img
+                            src={category.image}
+                            alt={category.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+                          {/* Badge pourcentage */}
+                          {category.discountPercentage > 0 && (
+                            <div className="absolute top-3 right-3 z-10">
+                              <span className="inline-block px-3 py-1 bg-red-600 text-white text-xs tracking-widest">
+                                -{category.discountPercentage}%
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="absolute bottom-0 left-0 right-0 p-4">
+                          <h3 className="text-lg font-light text-white mb-1">{category.name}</h3>
+                          <p className="text-xs text-white/80">{category.count} pièces</p>
+                          {category.discountPercentage > 0 && (
+                            <p className="text-xs text-red-300 font-medium mt-1">
+                              Jusqu'à -{category.discountPercentage}%
+                            </p>
+                          )}
+                          <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span className="inline-flex items-center text-white text-xs tracking-widest">
+                              Voir
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5l7 7-7 7" />
+                              </svg>
+                            </span>
+                          </div>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Navigation Catégories Mobile */}
+            <button
+              onClick={prevCategorySlide}
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/80 p-2 rounded-full hover:bg-white transition-colors duration-300"
+              aria-label="Catégories précédentes"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+
+            <button
+              onClick={nextCategorySlide}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/80 p-2 rounded-full hover:bg-white transition-colors duration-300"
+              aria-label="Catégories suivantes"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+
+            {/* Indicateurs Catégories Mobile */}
+            <div className="flex justify-center space-x-2 mt-6">
+              {Array.from({ length: totalCategorySlides }).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => goToCategorySlide(index)}
+                  className={`h-1 w-8 transition-all duration-300 ${index === currentCategorySlide ? 'bg-black' : 'bg-gray-300'}`}
+                  aria-label={`Aller aux catégories ${index + 1}`}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -814,7 +1377,7 @@ const Home = () => {
                   />
                   <button
                     type="submit"
-                    className="border border-black px-8 py-3 text-sm tracking-widest uppercase hover:bg-black hover:text-white transition-colors duration-300"
+                    className="border rounded-[50px] border-black px-8 py-3 text-sm tracking-widest uppercase hover:bg-black hover:text-white transition-colors duration-300"
                   >
                     S'inscrire
                   </button>
@@ -828,74 +1391,8 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Footer Minimaliste */}
-      <footer className="py-16" style={{ backgroundColor: colors.black, color: colors.white }}>
-        <div className="container mx-auto px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-            <div>
-              <h3 className="text-sm tracking-widest uppercase mb-6">CAPRICE</h3>
-              <p className="text-sm mb-6" style={{ color: colors.lightGray }}>
-                Maison de couture contemporaine. Créations exclusives depuis 2010.
-              </p>
-              <div className="flex space-x-4">
-                {['Instagram', 'Pinterest', 'LinkedIn'].map((social) => (
-                  <a
-                    key={social}
-                    href={`https://${social.toLowerCase()}.com`}
-                    className="text-sm tracking-widest uppercase hover:text-gray-400 transition-colors"
-                    style={{ color: colors.lightGray }}
-                  >
-                    {social}
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            {[
-              {
-                title: 'Collections',
-                items: ['Haute Couture', 'Prêt-à-porter', 'Accessoires', 'Bijoux']
-              },
-              {
-                title: 'Services',
-                items: ['Sur Mesure', 'Location', 'Essayage Privé', 'Conseil Stylisme']
-              },
-              {
-                title: 'Information',
-                items: ['Contact', 'Livraison', 'Retours', 'CGV']
-              }
-            ].map((column, index) => (
-              <div key={index}>
-                <h4 className="text-sm tracking-widest uppercase mb-6">{column.title}</h4>
-                <ul className="space-y-3">
-                  {column.items.map((item) => (
-                    <li key={item}>
-                      <a
-                        href={`/${item.toLowerCase().replace(/ /g, '-')}`}
-                        className="text-sm hover:text-gray-400 transition-colors"
-                        style={{ color: colors.lightGray }}
-                      >
-                        {item}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-
-          <div className="border-t pt-8" style={{ borderColor: colors.mediumGray }}>
-            <div className="flex flex-col md:flex-row justify-between items-center">
-              <p className="text-sm mb-4 md:mb-0" style={{ color: colors.lightGray }}>
-                © {new Date().getFullYear()} CAPRICE. Tous droits réservés.
-              </p>
-              <div className="text-sm" style={{ color: colors.lightGray }}>
-                <p>Dakar • Paris • Abidjan</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };
