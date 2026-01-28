@@ -62,15 +62,14 @@ const Home = () => {
   const [email, setEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
 
-  // Références pour les intervalles
-  const sliderIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const discountSliderIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const categorySliderIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const collectionSliderIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  // Références pour les intervalles - CORRIGÉ
+  const sliderIntervalRef = useRef<number | null>(null);
+  const discountSliderIntervalRef = useRef<number | null>(null);
+  const categorySliderIntervalRef = useRef<number | null>(null);
+  const collectionSliderIntervalRef = useRef<number | null>(null);
 
   // Références pour le scrolling horizontal
   const signatureContainerRef = useRef<HTMLDivElement>(null);
-  const signatureProductsRef = useRef<HTMLDivElement>(null);
 
   // Références pour le swipe mobile
   const discountTouchStartX = useRef<number>(0);
@@ -247,7 +246,6 @@ const Home = () => {
   const totalCategorySlides = Math.ceil(categories.length / categoriesPerSlide);
 
   // Configuration du slider collections pour mobile
-  const collectionsPerSlide = 1;
   const totalCollectionSlides = categories.length;
 
   // Fonction pour passer au slide suivant du hero
@@ -387,7 +385,7 @@ const Home = () => {
       if (!isPaused) {
         nextSlide();
       }
-    }, 5000);
+    }, 5000) as unknown as number;
   }, [nextSlide, isPaused]);
 
   // Gestion du slider automatique des réductions
@@ -399,7 +397,7 @@ const Home = () => {
       if (!isPaused) {
         nextDiscountSlide();
       }
-    }, 5000);
+    }, 5000) as unknown as number;
   }, [nextDiscountSlide, isPaused]);
 
   // Gestion du slider automatique des catégories (mobile seulement)
@@ -411,7 +409,7 @@ const Home = () => {
       if (!isPaused) {
         nextCategorySlide();
       }
-    }, 5000);
+    }, 5000) as unknown as number;
   }, [nextCategorySlide, isPaused]);
 
   // Gestion du slider automatique des collections (mobile seulement)
@@ -423,7 +421,7 @@ const Home = () => {
       if (!isPaused) {
         nextCollectionSlide();
       }
-    }, 5000);
+    }, 5000) as unknown as number;
   }, [nextCollectionSlide, isPaused]);
 
   // Gestion des pauses
@@ -589,6 +587,7 @@ const Home = () => {
 
   // Fonction pour rediriger vers la page détail
   const goToProductDetail = (productId: number) => {
+    // eslint-disable-next-line react-hooks/immutability
     window.location.href = `/detail?id=${productId}`;
   };
 
@@ -970,7 +969,7 @@ const Home = () => {
             </div>
 
             {/* Style pour cacher la scrollbar mais garder le scroll */}
-            <style jsx>{`
+            <style>{`
               .scrollbar-hide {
                 -ms-overflow-style: none;
                 scrollbar-width: none;

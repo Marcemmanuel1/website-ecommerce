@@ -1,4 +1,4 @@
-import { FaInstagram, FaFacebook, FaTwitter, FaPinterest, FaLinkedin } from 'react-icons/fa';
+import { FaInstagram, FaFacebook, FaTiktok } from 'react-icons/fa';
 
 const Footer = () => {
   // Palette de couleurs
@@ -27,9 +27,7 @@ const Footer = () => {
   const socialIcons = [
     { icon: <FaInstagram className="h-5 w-5" />, href: 'https://instagram.com', label: 'Instagram' },
     { icon: <FaFacebook className="h-5 w-5" />, href: 'https://facebook.com', label: 'Facebook' },
-    { icon: <FaTwitter className="h-5 w-5" />, href: 'https://twitter.com', label: 'Twitter' },
-    { icon: <FaPinterest className="h-5 w-5" />, href: 'https://pinterest.com', label: 'Pinterest' },
-    { icon: <FaLinkedin className="h-5 w-5" />, href: 'https://linkedin.com', label: 'LinkedIn' }
+    { icon: <FaTiktok className="h-5 w-5" />, href: 'https://tiktok.com', label: 'Tiktok' }
   ];
 
   return (
@@ -83,7 +81,7 @@ const Footer = () => {
               © {new Date().getFullYear()} CAPRICE. Tous droits réservés.
             </p>
             <div className="text-sm" style={{ color: colors.lightGray }}>
-              <p>Dakar • Paris • Abidjan</p>
+              <p>Cote d'ivoire • Abidjan</p>
             </div>
           </div>
         </div>
