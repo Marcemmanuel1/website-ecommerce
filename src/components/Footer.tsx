@@ -37,7 +37,7 @@ const Footer = () => {
           <div>
             <h3 className="text-sm tracking-widest uppercase mb-6">CAPRICE</h3>
             <p className="text-sm mb-6" style={{ color: colors.lightGray }}>
-              Maison de couture contemporaine. Créations exclusives depuis 2010.
+              Maison de couture contemporaine. Créations exclusives depuis 2026.
             </p>
             <div className="flex space-x-4">
               {socialIcons.map((social, index) => (
