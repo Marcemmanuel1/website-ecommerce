@@ -1,5 +1,6 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { FiTrash2 } from "react-icons/fi";
 
 interface CartItem {
   id: number;
@@ -50,12 +51,12 @@ const Cart = () => {
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: "url('/hero-section-un.jpg')",
+            backgroundImage: "url('/card-hero.jpg')",
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
         />
-        <div className="absolute inset-0 bg-black/60" />
+        <div className="absolute inset-0 bg-black/30" />
 
         <div className="relative z-10 container mx-auto px-8">
           <h1 className="text-5xl md:text-6xl font-light text-white mb-4">
@@ -75,10 +76,10 @@ const Cart = () => {
             {cartItems.map((item) => (
               <div
                 key={item.id}
-                className="flex flex-col md:flex-row gap-8 border-b pb-12"
+                className="flex flex-col md:flex-row gap-8 pb-12"
               >
                 {/* Image */}
-                <div className="w-full md:w-48 h-[280px] overflow-hidden">
+                <div className="w-full md:w-48 md:h-[280px] h-[400px] overflow-hidden">
                   <img
                     src={item.image}
                     alt={item.name}
@@ -92,7 +93,7 @@ const Cart = () => {
                     <p className="text-xs tracking-widest uppercase text-gray-500 mb-2">
                       {item.category}
                     </p>
-                    <h3 className="text-2xl font-light mb-4">
+                    <h3 className="md:text-xl text-sm  font-light mb-4">
                       {item.name}
                     </h3>
                     <p className="text-lg">
@@ -108,8 +109,8 @@ const Cart = () => {
                       <button className="px-2 text-lg">+</button>
                     </div>
 
-                    <button className="text-xs tracking-widest uppercase text-gray-500 hover:text-black transition">
-                      Supprimer
+                    <button className="text-gray-500 hover:text-black transition text-xl ml-6">
+                      <FiTrash2 />
                     </button>
                   </div>
                 </div>
@@ -147,7 +148,7 @@ const Cart = () => {
             </a>
 
             <a
-              href="/"
+              href="/products"
               className="block mt-6 text-center text-xs tracking-widest uppercase text-gray-500 hover:text-black transition"
             >
               Continuer vos achats

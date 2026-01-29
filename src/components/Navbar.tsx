@@ -7,7 +7,7 @@ interface NavbarProps {
   onCartClick?: () => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ cartItemsCount, onCartClick }) => {
+const Navbar: React.FC<NavbarProps> = ({ cartItemsCount }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -17,13 +17,7 @@ const Navbar: React.FC<NavbarProps> = ({ cartItemsCount, onCartClick }) => {
     darkGray: '#1a1a1a',
   };
 
-  const handleCartClick = () => {
-    if (onCartClick) {
-      onCartClick();
-    } else {
-      alert(`Vous avez ${cartItemsCount} articles dans votre panier`);
-    }
-  };
+
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -73,12 +67,11 @@ const Navbar: React.FC<NavbarProps> = ({ cartItemsCount, onCartClick }) => {
               </svg>
             </button>
 
-            {/* Logo - Au centre */}
             <h1 className="absolute left-1/2 transform -translate-x-1/2 text-2xl tracking-widest font-light uppercase">
               <a href="/">CAPRICE</a>
             </h1>
 
-            {/* Icônes - À droite */}
+
             <div className="flex items-center md:space-x-6 space-x-2">
               <button
                 onClick={handleSearchClick}
@@ -122,9 +115,9 @@ const Navbar: React.FC<NavbarProps> = ({ cartItemsCount, onCartClick }) => {
                   />
                 </svg>
               </a>
-              <button
+              <a
                 className="relative hover:text-gray-600 transition-colors"
-                onClick={handleCartClick}
+                href='/cart'
                 aria-label="Panier"
                 style={{ color: colors.lightGray }}
               >
@@ -147,7 +140,7 @@ const Navbar: React.FC<NavbarProps> = ({ cartItemsCount, onCartClick }) => {
                     {cartItemsCount}
                   </span>
                 )}
-              </button>
+              </a>
             </div>
           </div>
         </div>
