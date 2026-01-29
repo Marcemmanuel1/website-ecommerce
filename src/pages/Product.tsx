@@ -29,14 +29,14 @@ interface FilterOptions {
 }
 
 const Product = () => {
-  // Données complètes des produits
+  // Données complètes des produits avec prix en FCFA
   const allProductsData: Product[] = [
     {
       id: 1,
       name: "SWEAT COL ZIPPÉ BASIQUE",
       category: "VÊTEMENTS",
-      price: 39.95,
-      originalPrice: 39.95,
+      price: 26264, // ~39.95 EUR converti à 657 FCFA/EUR
+      originalPrice: 26264,
       image: "/article-un.jpg",
       isNew: false,
       isSale: false,
@@ -50,8 +50,8 @@ const Product = () => {
       id: 2,
       name: "SANDALES À DOUBLE BRIDE",
       category: "CHAUSSURES",
-      price: 29.95,
-      originalPrice: 29.95,
+      price: 19672, // ~29.95 EUR
+      originalPrice: 19672,
       image: "/article-deux.jpg",
       isNew: false,
       isSale: false,
@@ -64,8 +64,8 @@ const Product = () => {
       id: 3,
       name: "T-SHIRT IMPRIMÉ BIMATIÈRE",
       category: "VÊTEMENTS",
-      price: 22.95,
-      originalPrice: 22.95,
+      price: 15078, // ~22.95 EUR
+      originalPrice: 15078,
       image: "/article-trois.jpg",
       isNew: false,
       isSale: false,
@@ -78,8 +78,8 @@ const Product = () => {
       id: 4,
       name: "SANDALES À BRIDES",
       category: "CHAUSSURES",
-      price: 29.95,
-      originalPrice: 29.95,
+      price: 19672, // ~29.95 EUR
+      originalPrice: 19672,
       image: "/article-quatre.jpg",
       isNew: false,
       isSale: false,
@@ -92,8 +92,8 @@ const Product = () => {
       id: 5,
       name: "ROBE SCULPTURALE NOIR",
       category: "HAUTE COUTURE",
-      price: 89.95,
-      originalPrice: 129.95,
+      price: 59114, // ~89.95 EUR
+      originalPrice: 85395, // ~129.95 EUR
       image: "/article-dix-neuf.jpg",
       isNew: true,
       isSale: true,
@@ -106,8 +106,8 @@ const Product = () => {
       id: 6,
       name: "BLOUSE SOIE PREMIUM",
       category: "SIGNATURE",
-      price: 69.95,
-      originalPrice: 69.95,
+      price: 45962, // ~69.95 EUR
+      originalPrice: 45962,
       image: "/article-cinq.jpg",
       isNew: true,
       isSale: false,
@@ -120,8 +120,8 @@ const Product = () => {
       id: 7,
       name: "JUPE PLISSÉE",
       category: "AVANT-GARDE",
-      price: 49.95,
-      originalPrice: 65.95,
+      price: 32827, // ~49.95 EUR
+      originalPrice: 43330, // ~65.95 EUR
       image: "/article-six.jpg",
       isNew: false,
       isSale: true,
@@ -134,8 +134,8 @@ const Product = () => {
       id: 8,
       name: "SAC À MAIN STRUCTURÉ",
       category: "EXCLUSIVITÉ",
-      price: 119.95,
-      originalPrice: 119.95,
+      price: 78834, // ~119.95 EUR
+      originalPrice: 78834,
       image: "/sac-a-main.jpg",
       isNew: false,
       isSale: false,
@@ -148,8 +148,8 @@ const Product = () => {
       id: 9,
       name: "PULL EN MAILLE",
       category: "VÊTEMENTS",
-      price: 45.95,
-      originalPrice: 45.95,
+      price: 30196, // ~45.95 EUR
+      originalPrice: 30196,
       image: "/article-sept.jpg",
       isNew: true,
       isSale: false,
@@ -162,8 +162,8 @@ const Product = () => {
       id: 10,
       name: "BOTTINES EN CUIR",
       category: "CHAUSSURES",
-      price: 89.95,
-      originalPrice: 119.95,
+      price: 59114, // ~89.95 EUR
+      originalPrice: 78834, // ~119.95 EUR
       image: "/article-huit.jpg",
       isNew: false,
       isSale: true,
@@ -176,8 +176,8 @@ const Product = () => {
       id: 11,
       name: "CHEMISE OVERSIZE",
       category: "VÊTEMENTS",
-      price: 39.95,
-      originalPrice: 39.95,
+      price: 26264, // ~39.95 EUR
+      originalPrice: 26264,
       image: "/article-neuf.jpg",
       isNew: true,
       isSale: false,
@@ -190,8 +190,8 @@ const Product = () => {
       id: 12,
       name: "PANTALON TAILLEUR",
       category: "PRÊT-À-PORTER",
-      price: 59.95,
-      originalPrice: 59.95,
+      price: 39396, // ~59.95 EUR
+      originalPrice: 39396,
       image: "/article-dix.jpg",
       isNew: false,
       isSale: false,
@@ -204,8 +204,8 @@ const Product = () => {
       id: 13,
       name: "MANTEAU LONG",
       category: "OUTERWEAR",
-      price: 149.95,
-      originalPrice: 199.95,
+      price: 98535, // ~149.95 EUR
+      originalPrice: 131380, // ~199.95 EUR
       image: "/article-onze.jpg",
       isNew: true,
       isSale: true,
@@ -218,8 +218,8 @@ const Product = () => {
       id: 14,
       name: "BASKETS MINIMALISTES",
       category: "CHAUSSURES",
-      price: 79.95,
-      originalPrice: 79.95,
+      price: 52545, // ~79.95 EUR
+      originalPrice: 52545,
       image: "/article-douze.jpg",
       isNew: false,
       isSale: false,
@@ -232,8 +232,8 @@ const Product = () => {
       id: 15,
       name: "ÉCHARPE EN LAINE",
       category: "ACCESSOIRES",
-      price: 35.95,
-      originalPrice: 49.95,
+      price: 23627, // ~35.95 EUR
+      originalPrice: 32827, // ~49.95 EUR
       image: "/article-treize.jpg",
       isNew: false,
       isSale: true,
@@ -246,8 +246,8 @@ const Product = () => {
       id: 16,
       name: "ROBE MIDI FLUIDE",
       category: "VÊTEMENTS",
-      price: 69.95,
-      originalPrice: 69.95,
+      price: 45962, // ~69.95 EUR
+      originalPrice: 45962,
       image: "/article-quatorze.jpg",
       isNew: true,
       isSale: false,
@@ -260,8 +260,8 @@ const Product = () => {
       id: 17,
       name: "BLOUSON EN CUIR",
       category: "OUTERWEAR",
-      price: 199.95,
-      originalPrice: 249.95,
+      price: 131380, // ~199.95 EUR
+      originalPrice: 164225, // ~249.95 EUR
       image: "/article-quinze.jpg",
       isNew: false,
       isSale: true,
@@ -274,8 +274,8 @@ const Product = () => {
       id: 18,
       name: "LUNETTES DE SOLEIL",
       category: "ACCESSOIRES",
-      price: 49.95,
-      originalPrice: 49.95,
+      price: 32827, // ~49.95 EUR
+      originalPrice: 32827,
       image: "/article-seize.jpg",
       isNew: true,
       isSale: false,
@@ -288,8 +288,8 @@ const Product = () => {
       id: 19,
       name: "JEAN SLIM FIT",
       category: "VÊTEMENTS",
-      price: 59.95,
-      originalPrice: 59.95,
+      price: 39396, // ~59.95 EUR
+      originalPrice: 39396,
       image: "/article-dix-sept.jpg",
       isNew: false,
       isSale: false,
@@ -302,8 +302,8 @@ const Product = () => {
       id: 20,
       name: "CARDIGAN LONG",
       category: "VÊTEMENTS",
-      price: 69.95,
-      originalPrice: 89.95,
+      price: 45962, // ~69.95 EUR
+      originalPrice: 59114, // ~89.95 EUR
       image: "/article-dix-huit.jpg",
       isNew: true,
       isSale: true,
@@ -322,12 +322,13 @@ const Product = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
+  const [isMobile, setIsMobile] = useState(false);
   const itemsPerLoad = 8;
 
   // Filtres
   const [filters, setFilters] = useState<FilterOptions>({
     categories: [],
-    priceRange: { min: 0, max: 300 },
+    priceRange: { min: 0, max: 250000 },
     sortBy: 'featured'
   });
 
@@ -337,7 +338,19 @@ const Product = () => {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
-  // Catégories uniques
+  // Détection mobile
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+
+    return () => {
+      window.removeEventListener('resize', checkIfMobile);
+    };
+  }, []);
 
   // Initialisation
   useEffect(() => {
@@ -449,9 +462,14 @@ const Product = () => {
     };
   }, [loadMoreProducts, hasMore, loadingMore, loading]);
 
-  // Format prix
+  // Format prix en FCFA
   const formatPrice = (price: number) => {
-    return `${price.toFixed(2)} EUR`;
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: 'XOF',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(price);
   };
 
   // Ajouter au panier
@@ -467,12 +485,10 @@ const Product = () => {
   };
 
   // Gestion des filtres
-
-
   const clearFilters = () => {
     setFilters({
       categories: [],
-      priceRange: { min: 0, max: 300 },
+      priceRange: { min: 0, max: 250000 },
       sortBy: 'featured'
     });
   };
@@ -523,7 +539,7 @@ const Product = () => {
                   {displayedProducts.map((product) => (
                     <div
                       key={product.id}
-                      className="group cursor-pointer"
+                      className="group cursor-pointer relative"
                       onClick={() => goToProductDetail(product.id)}
                     >
                       {/* Image Container */}
@@ -536,43 +552,53 @@ const Product = () => {
                           />
                         </div>
 
-                        {/* Bouton Add to Cart */}
+                        {/* Bouton Add to Cart - Toujours visible sur mobile, au hover sur desktop */}
                         <button
                           onClick={(e) => addToCart(product.id, e)}
-                          className="absolute bottom-3 left-3 bg-white w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-gray-100"
+                          className={`absolute top-3 right-3 bg-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm transition-all duration-300 ${isMobile
+                            ? 'opacity-100'
+                            : 'opacity-0 group-hover:opacity-100'
+                            } hover:bg-gray-100 hover:scale-110 active:scale-95`}
                           aria-label="Ajouter au panier"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 4v16m8-8H4"
+                            />
                           </svg>
                         </button>
 
-                        {/* Icône Favoris */}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                          }}
-                          className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                          aria-label="Ajouter aux favoris"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                          </svg>
-                        </button>
+                        {/* Badges */}
+                        <div className="absolute top-3 left-3 flex flex-col gap-2">
+                          {product.isNew && (
+                            <span className="bg-black text-white text-xs px-2 py-1">
+                              NOUVEAU
+                            </span>
+                          )}
+                          {product.isSale && (
+                            <span className="bg-red-600 text-white text-xs px-2 py-1">
+                              -{product.discountPercentage}%
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       {/* Product Info */}
                       <div>
-                        <h3 className="text-sm mb-1 line-clamp-2 group-hover:underline">
+                        <h3 className="text-sm mb-1 line-clamp-2 font-light" style={{ color: '#333' }}>
                           {product.name}
                         </h3>
-                        {product.colorVariants && (
-                          <p className="text-xs text-gray-500 mb-1">
-                            +{product.colorVariants}
-                          </p>
-                        )}
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium">
+                          <span className="text-sm font-light">
                             {formatPrice(product.price)}
                           </span>
                           {product.isSale && product.originalPrice > product.price && (
