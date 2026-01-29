@@ -856,7 +856,7 @@ const Home = () => {
               className="text-sm tracking-widest uppercase hover:text-gray-600 transition-colors hidden md:block"
               style={{ color: colors.lightGray }}
             >
-              Voir toutes les créations →
+              Voir tous les articles →
             </a>
           </div>
 
@@ -1093,7 +1093,7 @@ const Home = () => {
               href="/products"
               className="inline-block border rounded-[50px] border-black px-12 py-4 text-sm tracking-widest uppercase hover:bg-black hover:text-white transition-colors duration-300"
             >
-              Voir toutes les créations
+              Voir tous nos articles
             </a>
           </div>
         </div>
@@ -1186,23 +1186,23 @@ const Home = () => {
         <div className="container mx-auto px-8">
           <div className="flex justify-between items-end mb-8">
             <div>
-              <h2 className="text-3xl font-light tracking-tight mb-2" style={{ color: colors.darkGray }}>
+              <h2 className="md:text-3xl text-2xl font-light tracking-tight mb-2" style={{ color: colors.darkGray }}>
                 Catégories en Promotions
               </h2>
-              <p className="text-sm tracking-widest uppercase" style={{ color: colors.lightGray }}>
+              <p className="md:text-sm text-[10px] tracking-widest uppercase" style={{ color: colors.lightGray }}>
                 Jusqu'à -40% de réduction
               </p>
             </div>
             <a
               href="/categories"
-              className="text-sm tracking-widest uppercase hover:text-gray-600 transition-colors"
+              className="md:text-sm text-[10px] tracking-widest uppercase hover:text-gray-600 transition-colors"
               style={{ color: colors.lightGray }}
             >
               Tout voir →
             </a>
           </div>
 
-          {/* Version desktop - Grid */}
+          {/* Version desktop */}
           <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {categories.map((category) => (
               <a
@@ -1210,7 +1210,7 @@ const Home = () => {
                 href={`/categories/${category.name.toLowerCase()}`}
                 className="group relative overflow-hidden"
               >
-                <div className="h-[300px] overflow-hidden">
+                <div className="h-[500px] overflow-hidden">
                   <img
                     src={category.image}
                     alt={category.name}
@@ -1248,7 +1248,7 @@ const Home = () => {
             ))}
           </div>
 
-          {/* Version mobile - Slider */}
+          {/* Version mobile */}
           <div className="md:hidden relative overflow-hidden"
             onTouchStart={handleCategoryTouchStart}
             onTouchEnd={handleCategoryTouchEnd}>
@@ -1263,7 +1263,7 @@ const Home = () => {
                         href={`/categories/${category.name.toLowerCase()}`}
                         className="group relative overflow-hidden"
                       >
-                        <div className="h-[250px] overflow-hidden">
+                        <div className="h-[400px] overflow-hidden">
                           <img
                             src={category.image}
                             alt={category.name}
@@ -1363,27 +1363,19 @@ const Home = () => {
                 </p>
               </div>
             ) : (
-              <form onSubmit={handleNewsletterSubmit} className="space-y-6">
-                <div className="flex">
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Votre adresse email"
-                    className="flex-1 border-b border-black px-4 py-3 text-center text-sm tracking-widest uppercase focus:outline-none focus:border-gray-400"
-                    style={{ backgroundColor: 'transparent' }}
-                    required
-                  />
-                  <button
-                    type="submit"
-                    className="border rounded-[50px] border-black px-8 py-3 text-sm tracking-widest uppercase hover:bg-black hover:text-white transition-colors duration-300"
-                  >
-                    S'inscrire
-                  </button>
-                </div>
-                <p className="text-xs" style={{ color: colors.lightGray }}>
-                  En vous inscrivant, vous acceptez notre politique de confidentialité.
-                </p>
+              <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-3 sm:gap-4 max-w-md mx-auto">
+                <input
+                  type="email"
+                  placeholder="Votre adresse email"
+                  className="flex-1 border-b border-black px-4 py-3 text-center text-xs sm:text-sm tracking-widest uppercase focus:outline-none focus:border-gray-400 bg-transparent"
+                  required
+                />
+                <button
+                  type="submit"
+                  className="border rounded-[50px] border-black px-6 sm:px-8 py-3 text-xs sm:text-sm tracking-widest uppercase hover:bg-black hover:text-white transition-colors duration-300 whitespace-nowrap"
+                >
+                  S'inscrire
+                </button>
               </form>
             )}
           </div>

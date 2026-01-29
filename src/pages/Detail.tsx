@@ -904,7 +904,7 @@ const Detail = () => {
                 type="submit"
                 className="border rounded-[50px] border-black px-6 sm:px-8 py-3 text-xs sm:text-sm tracking-widest uppercase hover:bg-black hover:text-white transition-colors duration-300 whitespace-nowrap"
               >
-                S'inscrire à la newsletter
+                S'inscrire
               </button>
             </form>
             <p className="mt-4 sm:mt-6 text-xs" style={{ color: colors.lightGray }}>
