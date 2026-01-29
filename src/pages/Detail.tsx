@@ -537,7 +537,7 @@ const Detail = () => {
                 </div>
 
                 {/* Scroll Indicator - Desktop */}
-                <div className="fixed left-8 top-1/2 transform -translate-y-1/2 flex flex-col items-center space-y-2 z-10">
+                <div className="absolute -left-15 top-1/4 transform -translate-y-1/2 flex flex-col items-center space-y-2 z-10">
                   <button
                     onClick={() => {
                       const gallery = galleryRef.current;
