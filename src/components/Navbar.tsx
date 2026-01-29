@@ -79,7 +79,7 @@ const Navbar: React.FC<NavbarProps> = ({ cartItemsCount, onCartClick }) => {
             </h1>
 
             {/* Icônes - À droite */}
-            <div className="flex items-center space-x-6">
+            <div className="flex items-center md:space-x-6 space-x-2">
               <button
                 onClick={handleSearchClick}
                 className="hover:text-gray-600 transition-colors"

@@ -81,10 +81,7 @@ const SearchOverlay = ({ isOpen, onClose }: SearchOverlayProps) => {
           <div className="flex-shrink-0">
             <div className="container mx-auto px-6 py-8">
               {/* Header with close button */}
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl tracking-widest font-light uppercase">
-                  CAPRICE
-                </h2>
+              <div className="sticky top-0 z-50 bg-white flex items-center justify-between mb-8 py-4">
                 <button
                   onClick={onClose}
                   className="text-gray-600 hover:text-gray-900 transition-colors"
@@ -105,14 +102,19 @@ const SearchOverlay = ({ isOpen, onClose }: SearchOverlayProps) => {
                     />
                   </svg>
                 </button>
+
+                <h2 className="text-2xl tracking-widest font-light uppercase">
+                  CAPRICE
+                </h2>
               </div>
+
 
               {/* Search Input */}
               <div className="max-w-4xl mx-auto">
                 <div className="relative">
                   <input
                     type="text"
-                    placeholder="Rechercher vos vêtements préférés..."
+                    placeholder="Rechercher..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full px-6 py-4 text-lg border-2 border-gray-200 rounded-full focus:outline-none focus:border-gray-400 transition-colors"
