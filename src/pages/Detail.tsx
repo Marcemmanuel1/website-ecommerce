@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -29,6 +29,7 @@ interface ProductDetail {
   features?: string[];
   season?: string;
   designer?: string;
+  productCode?: string;
 }
 
 const Detail = () => {
@@ -45,57 +46,69 @@ const Detail = () => {
   const [isAddedToCart, setIsAddedToCart] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const galleryRef = useRef<HTMLDivElement>(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
 
-  // Données de détail des produits - Robe en premier
+  // Données de détail des produits
   const productDetails: ProductDetail[] = [
     {
       id: 1,
       name: "ROBE SCULPTURALE NOIR",
-      category: "HAUTE COUTURE",
-      description: "Robe structurée à la coupe architecturale pour soirée",
-      detailedDescription: "Cette robe sculpturale en noir profond est une pièce signature de notre collection Haute Couture Printemps-Été 2024. Taillée dans un tissu technique à fort maintien, elle épouse les courbes du corps tout en créant une silhouette avant-gardiste. Les détails de couture apparents et les empiècements structurés confèrent à cette robe une dimension architecturale unique. Parfaite pour les événements d'exception, elle est conçue pour faire sensation.",
-      price: 26600,
-      originalPrice: 38000,
+      category: "PRÊT-À-PORTER",
+      description: "Robe longue noire à coupe sculpturale et lignes architecturales",
+      detailedDescription: "Cette robe sculpturale noire se distingue par une coupe architecturale pensée pour sublimer la silhouette. Confectionnée dans un tissu premium à la tenue impeccable, elle épouse le corps avec élégance tout en offrant une structure moderne. Son design minimaliste est rehaussé par des découpes précises et des finitions soignées, faisant de cette pièce un incontournable chic et intemporel.",
+      price: 35000,
+      originalPrice: 35000,
       images: [
-        "https://images.unsplash.com/photo-1595777457583-95e059d581b8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-        "https://images.unsplash.com/photo-1539008835657-9e8e9680c956?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-        "https://images.unsplash.com/photo-1595777457583-95e059d581b8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=70",
-        "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80"
+        "/robe-noir.jpg",
+        "/robe-un.jpg",
+        "/robe-deux.jpg",
+        "/robe-trois.jpg",
+        "/robe-quatre.jpg"
       ],
       isNew: true,
-      isSale: true,
-      discountPercentage: 30,
-      sizes: ["XS", "S", "M", "L", "XL"],
+      isSale: false,
+      discountPercentage: 0,
+      sizes: ["XS", "S", "M", "L"],
       colors: [
-        { name: "Noir profond", hex: "#000000" },
-        { name: "Bordeaux", hex: "#800020" },
-        { name: "Vert émeraude", hex: "#50C878" }
+        { name: "Noir", hex: "#000000" },
+        { name: "Vert sauge", hex: "#9CAF88" },
+        { name: "Rouge bourdeau", hex: "#800020" },
+        { name: "beige", hex: "#F5F5DC" }
       ],
-      materials: ["Polyester technique premium", "Élasthanne 5%", "Doublure soie"],
+      materials: [
+        "Tissu premium structuré",
+        "Mélange polyester et viscose",
+        "Doublure satinée"
+      ],
       careInstructions: [
-        "Nettoyage à sec uniquement",
-        "Repasser à basse température",
-        "Ne pas blanchir",
-        "Sécher à plat",
-        "Conserver sur cintre en bois"
+        "Nettoyage à sec recommandé",
+        "Repassage à basse température",
+        "Éviter le blanchiment",
+        "Conserver sur cintre",
+        "Ne pas exposer longtemps au soleil"
       ],
-      stock: 5,
+      stock: 8,
       measurements: {
-        length: "125 cm",
-        waist: "Adaptable",
-        bust: "Adaptable",
-        hips: "Adaptable"
+        length: "135 cm",
+        bust: "86-92 cm",
+        hips: "92-98 cm"
       },
       features: [
-        "Coupe architecturale",
-        "Dos ouvert avec lacets",
-        "Fermeture invisible",
-        "Tissu respirant",
-        "Made in France"
+        "Coupe sculpturale",
+        "Silhouette élégante et structurée",
+        "Fermeture discrète au dos",
+        "Taille marquée",
+        "Finitions couture"
       ],
-      season: "Printemps-Été 2024",
-      designer: "Émilie Laurent"
+      season: "Collection Permanente",
+      designer: "Atelier Couture",
+      productCode: "RSN-001"
     },
+
     {
       id: 2,
       name: "ROBE SOIRÉE ASYMÉTRIQUE",
@@ -105,8 +118,8 @@ const Detail = () => {
       price: 18900,
       originalPrice: 27000,
       images: [
-        "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
-        "https://images.unsplash.com/photo-1585487000160-6eb9ce6b5aae?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80"
+        "/robe-soiree-un.jpg",
+        "/robe-soiree-deux.jpg"
       ],
       isNew: true,
       isSale: true,
@@ -130,7 +143,8 @@ const Detail = () => {
         "Dos ouvert"
       ],
       season: "Automne-Hiver 2023",
-      designer: "Sophie Martin"
+      designer: "Sophie Martin",
+      productCode: "M28325"
     },
     {
       id: 3,
@@ -141,8 +155,8 @@ const Detail = () => {
       price: 12500,
       originalPrice: 12500,
       images: [
-        "https://images.unsplash.com/photo-1595777457583-95e059d581b8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=60",
-        "https://images.unsplash.com/photo-1539008835657-9e8e9680c956?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=60"
+        "/robe-midi-un.jpg",
+        "/robe-midi-deux.jpg"
       ],
       isNew: true,
       isSale: false,
@@ -165,7 +179,8 @@ const Detail = () => {
         "Poches intégrées"
       ],
       season: "Printemps-Été 2024",
-      designer: "Camille Dubois"
+      designer: "Camille Dubois",
+      productCode: "M28326"
     },
     {
       id: 4,
@@ -176,7 +191,9 @@ const Detail = () => {
       price: 16500,
       originalPrice: 22000,
       images: [
-        "https://images.unsplash.com/photo-1595777457583-95e059d581b8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=50"
+        "/robe-part-un.jpg",
+        "/robe-part-deux.jpg",
+        "/robe-part-trois.jpg"
       ],
       isNew: false,
       isSale: true,
@@ -198,7 +215,8 @@ const Detail = () => {
         "Broderie main"
       ],
       season: "Automne-Hiver 2023",
-      designer: "Anne-Claire"
+      designer: "Anne-Claire",
+      productCode: "M28327"
     },
     {
       id: 5,
@@ -209,7 +227,9 @@ const Detail = () => {
       price: 8900,
       originalPrice: 12000,
       images: [
-        "https://images.unsplash.com/photo-1595777457583-95e059d581b8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=40"
+        "/robe-maxi-un.jpg",
+        "/robe-maxi-deux.jpg",
+        "/robe-maxi-trois.jpg"
       ],
       isNew: false,
       isSale: true,
@@ -232,7 +252,8 @@ const Detail = () => {
         "Ceinture intégrée"
       ],
       season: "Printemps-Été 2024",
-      designer: "Élise"
+      designer: "Élise",
+      productCode: "M28328"
     },
     {
       id: 6,
@@ -244,7 +265,8 @@ const Detail = () => {
       originalPrice: 19000,
       images: [
         "https://images.unsplash.com/photo-1595777457583-95e059d581b8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=30",
-        "https://images.unsplash.com/photo-1539008835657-9e8e9680c956?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=30"
+        "https://images.unsplash.com/photo-1539008835657-9e8e9680c956?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=30",
+        "https://images.unsplash.com/photo-1585487000160-6eb9ce6b5aae?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=30"
       ],
       isNew: true,
       isSale: true,
@@ -266,12 +288,16 @@ const Detail = () => {
         "Fermeture dos"
       ],
       season: "Printemps-Été 2024",
-      designer: "Marie"
+      designer: "Marie",
+      productCode: "M28329"
     }
   ];
 
-  // Récupérer le produit actuel (robe par défaut)
+  // Récupérer le produit actuel
   const currentProduct = productDetails.find(product => product.id === productId) || productDetails[0];
+
+  // Produits similaires (exclure le produit actuel)
+  const similarProducts = productDetails.filter(product => product.id !== currentProduct.id);
 
   // Détecter la taille de l'écran
   useEffect(() => {
@@ -297,9 +323,35 @@ const Detail = () => {
     return () => clearTimeout(timer);
   }, [productId]);
 
-  // Fonction pour formater le prix
+  // Touch handlers for mobile swipe
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStart - touchEnd > 75) {
+      // Swipe left
+      setSelectedImage((prev) =>
+        prev < currentProduct.images.length - 1 ? prev + 1 : prev
+      );
+    }
+
+    if (touchStart - touchEnd < -75) {
+      // Swipe right
+      setSelectedImage((prev) => (prev > 0 ? prev - 1 : prev));
+    }
+  };
+
+  // Fonction pour formater le prix en FCFA
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(price);
+    return new Intl.NumberFormat('fr-FR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(price) + ' FCFA';
   };
 
   // Fonction pour ajouter au panier
@@ -319,14 +371,29 @@ const Detail = () => {
       name: currentProduct.name,
       size: selectedSize,
       color: selectedColor,
-      quantity,
+      quantity: quantity,
       price: currentProduct.price,
       image: currentProduct.images[0]
     };
 
     // Récupérer le panier existant
     const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
-    existingCart.push(cartItem);
+
+    // Vérifier si l'article existe déjà avec la même taille et couleur
+    const existingItemIndex = existingCart.findIndex((item: any) =>
+      item.productId === cartItem.productId &&
+      item.size === cartItem.size &&
+      item.color === cartItem.color
+    );
+
+    if (existingItemIndex > -1) {
+      // Mettre à jour la quantité si l'article existe déjà
+      existingCart[existingItemIndex].quantity += quantity;
+    } else {
+      // Ajouter le nouvel article
+      existingCart.push(cartItem);
+    }
+
     localStorage.setItem('cart', JSON.stringify(existingCart));
 
     // Mettre à jour l'état
@@ -337,28 +404,6 @@ const Detail = () => {
     setTimeout(() => {
       setIsAddedToCart(false);
     }, 3000);
-
-    // Animation feedback
-    const addButton = document.getElementById('add-to-cart-button');
-    if (addButton) {
-      addButton.classList.add('bg-green-600');
-      setTimeout(() => {
-        addButton.classList.remove('bg-green-600');
-      }, 300);
-    }
-  };
-
-  // Fonction pour augmenter/diminuer la quantité
-  const increaseQuantity = () => {
-    if (quantity < currentProduct.stock) {
-      setQuantity(prev => prev + 1);
-    }
-  };
-
-  const decreaseQuantity = () => {
-    if (quantity > 1) {
-      setQuantity(prev => prev - 1);
-    }
   };
 
   // Fonction pour naviguer vers un autre produit
@@ -377,16 +422,59 @@ const Detail = () => {
     alert(`Vous avez ${cartItems.length} articles dans votre panier`);
   };
 
-  // Palette de couleurs inspirée de Home.tsx
+  // Palette de couleurs
   const colors = {
     black: '#000000',
     darkGray: '#1a1a1a',
     mediumGray: '#333333',
     lightGray: '#666666',
+    veryLightGray: '#999999',
     white: '#ffffff',
     accent: '#000000',
     lightBg: '#f5f5f5',
     border: '#e0e0e0'
+  };
+
+  // Incrémenter la quantité
+  const incrementQuantity = () => {
+    if (quantity < currentProduct.stock) {
+      setQuantity(quantity + 1);
+    }
+  };
+
+  // Décrémenter la quantité
+  const decrementQuantity = () => {
+    if (quantity > 1) {
+      setQuantity(quantity - 1);
+    }
+  };
+
+  // Fonctions pour le carousel mobile
+  const nextSlide = () => {
+    if (currentSlide < similarProducts.length - 1) {
+      setCurrentSlide(currentSlide + 1);
+    }
+  };
+
+  const prevSlide = () => {
+    if (currentSlide > 0) {
+      setCurrentSlide(currentSlide - 1);
+    }
+  };
+
+  // Touch handlers pour le carousel mobile
+  const handleCarouselTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleCarouselTouchEnd = () => {
+    if (touchStart - touchEnd > 50) {
+      nextSlide();
+    }
+
+    if (touchStart - touchEnd < -50) {
+      prevSlide();
+    }
   };
 
   if (isLoading) {
@@ -407,154 +495,223 @@ const Detail = () => {
       {/* Navbar */}
       <Navbar cartItemsCount={cartItems.length} onCartClick={handleCartClick} />
 
-      {/* Breadcrumb */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-        <div className="flex items-center text-xs sm:text-sm overflow-x-auto whitespace-nowrap">
-          <a href="/" className="hover:text-gray-600 transition-colors" style={{ color: colors.lightGray }}>
-            Accueil
-          </a>
-          <span className="mx-2" style={{ color: colors.lightGray }}>/</span>
-          <a href="/products" className="hover:text-gray-600 transition-colors" style={{ color: colors.lightGray }}>
-            Collections
-          </a>
-          <span className="mx-2" style={{ color: colors.lightGray }}>/</span>
-          <a href={`/categories/${currentProduct.category.toLowerCase().replace(/\s+/g, '-')}`} className="hover:text-gray-600 transition-colors" style={{ color: colors.lightGray }}>
-            {currentProduct.category}
-          </a>
-          <span className="mx-2" style={{ color: colors.lightGray }}>/</span>
-          <span className="tracking-widest uppercase font-medium" style={{ color: colors.darkGray }}>
-            {currentProduct.name}
-          </span>
-        </div>
-      </div>
-
       {/* Main Product Section */}
-      <section className="py-8 sm:py-12">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
-            {/* Left Column - Images */}
-            <div>
-              {/* Main Image */}
-              <div className="mb-4 sm:mb-6">
-                <div className="h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] xl:h-[700px] overflow-hidden bg-gray-100">
-                  <img
-                    src={currentProduct.images[selectedImage]}
-                    alt={currentProduct.name}
-                    className="w-full h-full object-cover transition-opacity duration-300"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = "https://images.unsplash.com/photo-1595777457583-95e059d581b8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
+      <section className="py-0">
+        <div className="container mx-auto px-0 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-16">
+            {/* Left Column - Images Gallery */}
+            <div className="relative">
+              {/* Desktop: Vertical Scrolling Gallery */}
+              <div className="hidden md:block">
+                <div
+                  ref={galleryRef}
+                  className="space-y-0 overflow-y-auto h-screen snap-y snap-mandatory"
+                  style={{
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none'
+                  }}
+                >
+                  <style>
+                    {`
+                      .space-y-0::-webkit-scrollbar {
+                        display: none;
+                      }
+                    `}
+                  </style>
+                  {currentProduct.images.map((image, index) => (
+                    <div
+                      key={index}
+                      className="w-full h-screen snap-start flex items-center justify-center bg-gray-50"
+                    >
+                      <img
+                        src={image}
+                        alt={`${currentProduct.name} - vue ${index + 1}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80";
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Scroll Indicator - Desktop */}
+                <div className="fixed left-8 top-1/2 transform -translate-y-1/2 flex flex-col items-center space-y-2 z-10">
+                  <button
+                    onClick={() => {
+                      const gallery = galleryRef.current;
+                      if (gallery) {
+                        const scrollAmount = gallery.scrollTop - window.innerHeight;
+                        gallery.scrollTo({ top: scrollAmount, behavior: 'smooth' });
+                      }
                     }}
-                  />
+                    className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-black transition-colors"
+                    aria-label="Image précédente"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                    </svg>
+                  </button>
+
+                  <div className="flex flex-col space-y-2">
+                    {currentProduct.images.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => {
+                          const gallery = galleryRef.current;
+                          if (gallery) {
+                            gallery.scrollTo({ top: window.innerHeight * index, behavior: 'smooth' });
+                          }
+                        }}
+                        className={`w-1.5 h-1.5 rounded-full transition-all ${selectedImage === index ? 'bg-black w-1.5 h-8' : 'bg-gray-300'
+                          }`}
+                        aria-label={`Aller à l'image ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      const gallery = galleryRef.current;
+                      if (gallery) {
+                        const scrollAmount = gallery.scrollTop + window.innerHeight;
+                        gallery.scrollTo({ top: scrollAmount, behavior: 'smooth' });
+                      }
+                    }}
+                    className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-black transition-colors"
+                    aria-label="Image suivante"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                    </svg>
+                  </button>
                 </div>
               </div>
 
-              {/* Thumbnail Images */}
-              <div className="flex space-x-2 sm:space-x-4 overflow-x-auto pb-2 sm:pb-4">
-                {currentProduct.images.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImage(index)}
-                    className={`flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 overflow-hidden border transition-all duration-300 ${selectedImage === index ? 'border-black scale-105' : 'border-gray-200 hover:border-gray-400'}`}
-                    aria-label={`Voir image ${index + 1}`}
+              {/* Mobile: Horizontal Slider */}
+              <div className="md:hidden relative">
+                <div
+                  className="relative overflow-hidden"
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                >
+                  <div
+                    className="flex transition-transform duration-300 ease-out"
+                    style={{ transform: `translateX(-${selectedImage * 100}%)` }}
                   >
-                    <img
-                      src={image}
-                      alt={`${currentProduct.name} - vue ${index + 1}`}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = "https://images.unsplash.com/photo-1595777457583-95e059d581b8?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80";
-                      }}
+                    {currentProduct.images.map((image, index) => (
+                      <div
+                        key={index}
+                        className="w-full flex-shrink-0"
+                      >
+                        <div className="h-[500px] bg-gray-50">
+                          <img
+                            src={image}
+                            alt={`${currentProduct.name} - vue ${index + 1}`}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Navigation Arrows - Mobile */}
+                  {selectedImage > 0 && (
+                    <button
+                      onClick={() => setSelectedImage(prev => prev - 1)}
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center shadow-lg z-10"
+                      aria-label="Image précédente"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                      </svg>
+                    </button>
+                  )}
+
+                  {selectedImage < currentProduct.images.length - 1 && (
+                    <button
+                      onClick={() => setSelectedImage(prev => prev + 1)}
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center shadow-lg z-10"
+                      aria-label="Image suivante"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+
+                {/* Dots Indicator - Mobile */}
+                <div className="flex justify-center space-x-2 mt-4 mb-6">
+                  {currentProduct.images.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedImage(index)}
+                      className={`h-1.5 rounded-full transition-all ${selectedImage === index ? 'bg-black w-8' : 'bg-gray-300 w-1.5'
+                        }`}
+                      aria-label={`Aller à l'image ${index + 1}`}
                     />
-                  </button>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* Right Column - Product Info */}
-            <div className="px-2 sm:px-0">
-              {/* Badges */}
-              <div className="flex flex-wrap items-center gap-2 mb-4 sm:mb-6">
-                {currentProduct.isNew && (
-                  <span className="inline-block px-3 py-1 bg-black text-white text-xs tracking-widest uppercase">
-                    Nouvelle Collection
-                  </span>
-                )}
-                {currentProduct.isSale && currentProduct.discountPercentage > 0 && (
-                  <span className="inline-block px-3 py-1 bg-red-600 text-white text-xs tracking-widest uppercase">
-                    -{currentProduct.discountPercentage}%
-                  </span>
-                )}
-                {currentProduct.season && (
-                  <span className="inline-block px-3 py-1 border border-black text-black text-xs tracking-widest uppercase">
-                    {currentProduct.season}
-                  </span>
-                )}
-              </div>
-
-              {/* Category */}
-              <p className="text-xs tracking-widest uppercase mb-3 sm:mb-4" style={{ color: colors.lightGray }}>
-                {currentProduct.category}
-              </p>
+            <div className="px-6 sm:px-8 lg:px-12 py-8 lg:py-12 flex flex-col">
 
               {/* Title */}
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light tracking-tight mb-4 sm:mb-6" style={{ color: colors.darkGray }}>
+              <h1
+                className="text-3xl sm:text-4xl font-light mb-8 leading-tight"
+                style={{ color: colors.darkGray }}
+              >
                 {currentProduct.name}
               </h1>
 
-              {/* Designer */}
-              {currentProduct.designer && (
-                <p className="text-sm mb-3 sm:mb-4" style={{ color: colors.mediumGray }}>
-                  Conçu par <span className="font-medium">{currentProduct.designer}</span>
-                </p>
-              )}
-
-              {/* Short Description */}
-              <p className="text-base sm:text-lg mb-6 sm:mb-8 leading-relaxed" style={{ color: colors.mediumGray }}>
-                {currentProduct.description}
-              </p>
-
               {/* Price */}
-              <div className="mb-6 sm:mb-8">
-                <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-                  <span className="text-2xl sm:text-3xl font-light" style={{ color: colors.darkGray }}>
-                    {formatPrice(currentProduct.price)}
-                  </span>
-                  {currentProduct.isSale && currentProduct.price < currentProduct.originalPrice && (
-                    <>
-                      <span className="text-base sm:text-lg line-through" style={{ color: colors.lightGray }}>
-                        {formatPrice(currentProduct.originalPrice)}
-                      </span>
-                      <span className="text-xs sm:text-sm px-2 sm:px-3 py-1 bg-red-50 text-red-600 font-medium">
-                        Économisez {formatPrice(currentProduct.originalPrice - currentProduct.price)}
-                      </span>
-                    </>
-                  )}
-                </div>
+              <div className="mb-10">
+                <span className="text-2xl font-light" style={{ color: colors.darkGray }}>
+                  {formatPrice(currentProduct.price)}
+                </span>
+                {currentProduct.isSale && currentProduct.price < currentProduct.originalPrice && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="text-lg line-through" style={{ color: colors.veryLightGray }}>
+                      {formatPrice(currentProduct.originalPrice)}
+                    </span>
+                    <span className="text-sm bg-red-50 text-red-600 px-2 py-1">
+                      -{currentProduct.discountPercentage}%
+                    </span>
+                  </div>
+                )}
               </div>
 
-              {/* Colors */}
+              {/* Sélection de la couleur */}
               {currentProduct.colors.length > 0 && (
-                <div className="mb-6 sm:mb-8">
-                  <h3 className="text-sm tracking-widest uppercase mb-3 sm:mb-4" style={{ color: colors.darkGray }}>
-                    Couleur
+                <div className="mb-8">
+                  <h3 className="text-base font-light mb-4" style={{ color: colors.darkGray }}>
+                    Couleur: {selectedColor || "Sélectionnez une couleur"}
                   </h3>
-                  <div className="flex flex-wrap gap-2 sm:gap-3">
+                  <div className="flex flex-wrap gap-3">
                     {currentProduct.colors.map((color, index) => (
                       <button
                         key={index}
                         onClick={() => setSelectedColor(color.name)}
-                        className={`flex flex-col items-center ${selectedColor === color.name ? 'opacity-100' : 'opacity-80 hover:opacity-100'}`}
-                        aria-label={`Sélectionner la couleur ${color.name}`}
+                        className={`flex items-center gap-2 px-4 py-2 border rounded-full transition-all ${selectedColor === color.name
+                          ? 'border-black bg-gray-50'
+                          : 'border-gray-300 hover:border-gray-400'
+                          }`}
                       >
                         <div
-                          className={`w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full border-2 ${selectedColor === color.name ? 'border-black scale-110' : 'border-gray-300'} transition-all duration-300`}
+                          className="w-6 h-6 rounded-full border border-gray-300"
                           style={{ backgroundColor: color.hex }}
-                          title={color.name}
                         />
-                        <span className="mt-1 sm:mt-2 text-xs text-center" style={{ color: colors.mediumGray }}>
-                          {isMobile && color.name.length > 10 ? `${color.name.substring(0, 8)}...` : color.name}
+                        <span className="text-sm" style={{ color: colors.mediumGray }}>
+                          {color.name}
                         </span>
                       </button>
                     ))}
@@ -562,27 +719,21 @@ const Detail = () => {
                 </div>
               )}
 
-              {/* Sizes */}
+              {/* Sélection de la taille */}
               {currentProduct.sizes.length > 0 && (
-                <div className="mb-6 sm:mb-8">
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-3 sm:mb-4">
-                    <h3 className="text-sm tracking-widest uppercase mb-2 sm:mb-0" style={{ color: colors.darkGray }}>
-                      Taille
-                    </h3>
-                    <a href="#" className="text-xs hover:text-gray-600 transition-colors flex items-center" style={{ color: colors.lightGray }}>
-                      Guide des tailles
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </a>
-                  </div>
-                  <div className="flex flex-wrap gap-2 sm:gap-3">
+                <div className="mb-8">
+                  <h3 className="text-base font-light mb-4" style={{ color: colors.darkGray }}>
+                    Taille: {selectedSize || "Sélectionnez une taille"}
+                  </h3>
+                  <div className="flex flex-wrap gap-3">
                     {currentProduct.sizes.map((size, index) => (
                       <button
                         key={index}
                         onClick={() => setSelectedSize(size)}
-                        className={`px-4 py-2 sm:px-6 sm:py-3 border text-xs sm:text-sm tracking-widest uppercase transition-all duration-300 ${selectedSize === size ? 'bg-black text-white border-black scale-105' : 'border-gray-300 hover:border-black hover:bg-gray-50'}`}
-                        aria-label={`Sélectionner la taille ${size}`}
+                        className={`w-12 h-12 flex items-center justify-center border text-sm transition-all ${selectedSize === size
+                          ? 'border-black bg-black text-white'
+                          : 'border-gray-300 hover:border-gray-400'
+                          }`}
                       >
                         {size}
                       </button>
@@ -591,212 +742,248 @@ const Detail = () => {
                 </div>
               )}
 
-              {/* Quantity & Add to Cart */}
-              <div className="mb-8 sm:mb-10">
-                <div className="flex items-center mb-4 sm:mb-6">
-                  <h3 className="text-sm tracking-widest uppercase mr-4 sm:mr-8" style={{ color: colors.darkGray }}>
-                    Quantité
-                  </h3>
-                  <div className="flex items-center border border-gray-300">
+              {/* Sélection de la quantité */}
+              <div className="mb-10">
+                <h3 className="text-base font-light mb-4" style={{ color: colors.darkGray }}>
+                  Quantité
+                </h3>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center border border-gray-300 rounded-full">
                     <button
-                      onClick={decreaseQuantity}
-                      className="px-3 py-2 sm:px-4 sm:py-3 hover:bg-gray-50 transition-colors disabled:opacity-30"
+                      onClick={decrementQuantity}
+                      className="w-12 h-12 flex items-center justify-center text-xl hover:bg-gray-50 rounded-l-full transition-colors"
                       disabled={quantity <= 1}
-                      aria-label="Diminuer la quantité"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 12H4" />
-                      </svg>
+                      -
                     </button>
-                    <span className="px-4 py-2 sm:px-6 sm:py-3 text-base sm:text-lg" style={{ color: colors.darkGray }}>
+                    <span className="w-12 text-center" style={{ color: colors.darkGray }}>
                       {quantity}
                     </span>
                     <button
-                      onClick={increaseQuantity}
-                      className="px-3 py-2 sm:px-4 sm:py-3 hover:bg-gray-50 transition-colors disabled:opacity-30"
+                      onClick={incrementQuantity}
+                      className="w-12 h-12 flex items-center justify-center text-xl hover:bg-gray-50 rounded-r-full transition-colors"
                       disabled={quantity >= currentProduct.stock}
-                      aria-label="Augmenter la quantité"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4v16m8-8H4" />
-                      </svg>
+                      +
                     </button>
                   </div>
                 </div>
-
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                  <button
-                    id="add-to-cart-button"
-                    onClick={addToCart}
-                    className={`flex-1 py-3 sm:py-4 text-xs sm:text-sm tracking-widest uppercase transition-all duration-300 ${isAddedToCart ? 'bg-green-600 text-white' : 'bg-black text-white hover:bg-gray-800'}`}
-                    aria-label={isAddedToCart ? "Article ajouté au panier" : "Ajouter au panier"}
-                  >
-                    {isAddedToCart ? (
-                      <span className="flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        Ajoutée au panier
-                      </span>
-                    ) : (
-                      'Ajouter au panier'
-                    )}
-                  </button>
-                  <button
-                    onClick={() => {
-                      addToCart();
-                      navigate('/cart');
-                    }}
-                    className="flex-1 py-3 sm:py-4 border border-black text-xs sm:text-sm tracking-widest uppercase hover:bg-black hover:text-white transition-colors duration-300"
-                    aria-label="Acheter maintenant"
-                  >
-                    Acheter maintenant
-                  </button>
-                </div>
-
-                {/* Stock Information */}
-                <p className="mt-3 sm:mt-4 text-xs sm:text-sm" style={{ color: colors.lightGray }}>
-                  {currentProduct.stock > 5 ? (
-                    <span className="text-green-600 flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      En stock • Expédition sous 24-48h
-                    </span>
-                  ) : currentProduct.stock > 0 ? (
-                    <span className="text-yellow-600 flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.342 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                      </svg>
-                      Plus que {currentProduct.stock} pièce(s) disponible(s)
-                    </span>
-                  ) : (
-                    <span className="text-red-600 flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                      Rupture de stock
-                    </span>
-                  )}
-                </p>
               </div>
 
-              {/* Detailed Description */}
-              <div className="mb-8 sm:mb-10 border-t border-b py-6 sm:py-8" style={{ borderColor: colors.border }}>
-                <h3 className="text-sm tracking-widest uppercase mb-4 sm:mb-6" style={{ color: colors.darkGray }}>
-                  Description détaillée
-                </h3>
-                <p className="leading-relaxed mb-4 sm:mb-6 text-sm sm:text-base" style={{ color: colors.mediumGray }}>
+              {/* Add to Cart Button */}
+              <button
+                id="add-to-cart-button"
+                onClick={addToCart}
+                className={`w-full py-5 px-8 text-white text-base hover:bg-white font-light rounded-full transition-all duration-300 mb-4 ${isAddedToCart
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-black hover:text-black hover:border-1"
+                  }`}
+                aria-label="Ajouter au panier"
+                disabled={!selectedSize || !selectedColor}
+              >
+                {isAddedToCart
+                  ? "Ajouté au panier ✓"
+                  : !selectedSize || !selectedColor
+                    ? "Sélectionnez taille et couleur"
+                    : `Ajouter au panier - ${formatPrice(currentProduct.price * quantity)}`}
+              </button>
+
+              {/* Delivery Info */}
+              <p
+                className="text-sm mb-12 leading-relaxed"
+                style={{ color: colors.mediumGray }}
+              >
+                Livraison le jour même ou le jour ouvré suivant, selon la disponibilité
+                produit.
+              </p>
+
+              {/* Product Description */}
+              <div className="mb-10">
+                <p
+                  className="text-base leading-relaxed mb-4"
+                  style={{ color: colors.mediumGray }}
+                >
                   {currentProduct.detailedDescription}
                 </p>
 
-                {/* Features */}
-                {currentProduct.features && currentProduct.features.length > 0 && (
-                  <div className="mt-4 sm:mt-6">
-                    <h4 className="text-xs tracking-widest uppercase mb-2 sm:mb-3" style={{ color: colors.darkGray }}>
-                      Caractéristiques
-                    </h4>
-                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-2">
-                      {currentProduct.features.map((feature, index) => (
-                        <li key={index} className="flex items-center text-xs sm:text-sm" style={{ color: colors.mediumGray }}>
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                          {feature}
-                        </li>
+                <button
+                  className="text-sm underline hover:no-underline font-light"
+                  style={{ color: colors.darkGray }}
+                >
+                  Voir plus
+                </button>
+              </div>
+
+              {/* Collapsible Sections */}
+              <div className="space-y-0 border-t" style={{ borderColor: colors.border }}>
+                {/* Durability */}
+                <details className="group border-b py-6" style={{ borderColor: colors.border }}>
+                  <summary className="flex justify-between items-center cursor-pointer list-none">
+                    <span className="text-base font-light" style={{ color: colors.darkGray }}>
+                      Durabilité
+                    </span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 transition-transform group-open:rotate-45"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={1}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                  </summary>
+
+                  <div
+                    className="mt-6 text-sm leading-relaxed"
+                    style={{ color: colors.mediumGray }}
+                  >
+                    <p>
+                      Nos produits sont conçus pour durer. Fabriqués avec des matériaux de
+                      première qualité et un savoir-faire exceptionnel, chaque pièce est
+                      pensée pour résister à l'épreuve du temps tout en conservant son
+                      élégance.
+                    </p>
+                  </div>
+                </details>
+
+                {/* Care Instructions */}
+                <details className="group border-b py-6" style={{ borderColor: colors.border }}>
+                  <summary className="flex justify-between items-center cursor-pointer list-none">
+                    <span className="text-base font-light" style={{ color: colors.darkGray }}>
+                      Entretien du produit
+                    </span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 transition-transform group-open:rotate-45"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={1}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                  </summary>
+
+                  <div className="mt-6">
+                    <ul
+                      className="space-y-2 text-sm leading-relaxed"
+                      style={{ color: colors.mediumGray }}
+                    >
+                      {currentProduct.careInstructions.map((instruction, index) => (
+                        <li key={index}>• {instruction}</li>
                       ))}
                     </ul>
                   </div>
-                )}
+                </details>
+
+                {/* Find in Store */}
+                <details className="group border-b py-6" style={{ borderColor: colors.border }}>
+                  <summary className="flex justify-between items-center cursor-pointer list-none">
+                    <span className="text-base font-light" style={{ color: colors.darkGray }}>
+                      Trouver ce produit en magasin
+                    </span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 transition-transform group-open:rotate-45"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={1}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                  </summary>
+
+                  <div
+                    className="mt-6 text-sm leading-relaxed"
+                    style={{ color: colors.mediumGray }}
+                  >
+                    <p>
+                      Ce produit est disponible dans nos boutiques sélectionnées. Contactez
+                      notre service client au +33 1 23 45 67 89 pour connaître la
+                      disponibilité près de chez vous.
+                    </p>
+                  </div>
+                </details>
               </div>
 
-              {/* Additional Information */}
-              <div className="border-t border-b py-6 sm:py-8" style={{ borderColor: colors.border }}>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-                  {/* Materials */}
-                  {currentProduct.materials.length > 0 && (
-                    <div>
-                      <h4 className="text-xs tracking-widest uppercase mb-2 sm:mb-3" style={{ color: colors.darkGray }}>
-                        Composition
-                      </h4>
-                      <ul className="space-y-1 sm:space-y-2">
-                        {currentProduct.materials.map((material, index) => (
-                          <li key={index} className="text-xs sm:text-sm" style={{ color: colors.mediumGray }}>
-                            {material}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+              {/* Additional Links */}
+              <div
+                className="mt-8 space-y-0 border-t pt-8"
+                style={{ borderColor: colors.border }}
+              >
+                <a
+                  href="#"
+                  className="flex justify-between items-center py-5 text-base font-light hover:bg-gray-50 transition-colors"
+                  style={{ color: colors.darkGray }}
+                >
+                  <span>Livraison & Retours</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={1}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
 
-                  {/* Care Instructions */}
-                  {currentProduct.careInstructions.length > 0 && (
-                    <div>
-                      <h4 className="text-xs tracking-widest uppercase mb-2 sm:mb-3" style={{ color: colors.darkGray }}>
-                        Entretien
-                      </h4>
-                      <ul className="space-y-1 sm:space-y-2">
-                        {currentProduct.careInstructions.map((instruction, index) => (
-                          <li key={index} className="text-xs sm:text-sm" style={{ color: colors.mediumGray }}>
-                            {instruction}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Measurements */}
-                  {currentProduct.measurements && (
-                    <div>
-                      <h4 className="text-xs tracking-widest uppercase mb-2 sm:mb-3" style={{ color: colors.darkGray }}>
-                        Dimensions
-                      </h4>
-                      <ul className="space-y-1 sm:space-y-2">
-                        {Object.entries(currentProduct.measurements).map(([key, value]) => (
-                          <li key={key} className="text-xs sm:text-sm" style={{ color: colors.mediumGray }}>
-                            <span className="capitalize">{key} : </span>
-                            <span className="font-medium">{value}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
+                <a
+                  href="#"
+                  className="flex justify-between items-center py-5 text-base font-light border-t hover:bg-gray-50 transition-colors"
+                  style={{ color: colors.darkGray, borderColor: colors.border }}
+                >
+                  <span>L'Art d'Offrir</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={1}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
               </div>
             </div>
+
           </div>
         </div>
       </section>
 
-      {/* Related Products - Robes similaires avec navigation */}
-      <section className="py-12 sm:py-16 lg:py-24 border-t" style={{ borderColor: colors.border, backgroundColor: colors.lightBg }}>
+      {/* Related Products */}
+      <section className="py-16 lg:py-24 border-t" style={{ borderColor: colors.border, backgroundColor: colors.lightBg }}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end mb-8 sm:mb-12 lg:mb-16">
-            <div className="mb-4 sm:mb-0">
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-light tracking-tight mb-2 sm:mb-4" style={{ color: colors.darkGray }}>
-                Robes similaires
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end mb-12 lg:mb-16">
+            <div className="mb-6 sm:mb-0">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-light tracking-tight mb-2" style={{ color: colors.darkGray }}>
+                Produits similaires
               </h2>
-              <p className="text-xs sm:text-sm tracking-widest uppercase" style={{ color: colors.lightGray }}>
-                Complétez votre dressing
+              <p className="text-sm tracking-wide" style={{ color: colors.veryLightGray }}>
+                Découvrez notre sélection
               </p>
             </div>
             <a
-              href="/categories/robes"
-              className="text-xs sm:text-sm tracking-widest uppercase hover:text-gray-600 transition-colors inline-block"
-              style={{ color: colors.lightGray }}
+              href="/products"
+              className="text-sm tracking-wide hover:text-gray-600 transition-colors inline-block font-light"
+              style={{ color: colors.mediumGray }}
             >
-              Voir toutes les robes →
+              Voir tous les produits →
             </a>
           </div>
 
-          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-            {productDetails
-              .filter(product => product.id !== currentProduct.id)
-              .slice(0, isMobile ? 2 : 4)
+          {/* Desktop Grid */}
+          <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-3">
+            {similarProducts
+              .slice(0, 4)
               .map(product => (
                 <div
                   key={product.id}
-                  className="group cursor-pointer bg-white hover:shadow-lg transition-shadow duration-300"
+                  className="group cursor-pointer bg-white transition-shadow duration-300"
                   onClick={() => navigateToProduct(product.id)}
                   role="button"
                   tabIndex={0}
@@ -808,58 +995,55 @@ const Detail = () => {
                   aria-label={`Voir les détails de ${product.name}`}
                 >
                   {/* Image */}
-                  <div className="relative overflow-hidden mb-3 sm:mb-4">
-                    <div className="h-[200px] sm:h-[250px] md:h-[300px] lg:h-[350px] xl:h-[400px] overflow-hidden bg-gray-100">
+                  <div className="relative overflow-hidden mb-4">
+                    <div className="h-[350px] sm:h-[400px] lg:h-[450px] overflow-hidden bg-gray-100">
                       <img
                         src={product.images[0]}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          target.src = "https://images.unsplash.com/photo-1595777457583-95e059d581b8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
+                          target.src = "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
                         }}
                       />
                     </div>
 
                     {/* Badges */}
-                    <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10">
+                    <div className="absolute top-4 left-4 z-10">
                       {product.isNew && (
-                        <span className="inline-block px-2 py-1 sm:px-3 sm:py-1 bg-white text-black text-xs tracking-widest uppercase">
+                        <span className="inline-block px-3 py-1 bg-white text-black text-xs tracking-wide font-light">
                           Nouveau
                         </span>
                       )}
                       {product.isSale && product.discountPercentage > 0 && (
-                        <span className="inline-block px-2 py-1 sm:px-3 sm:py-1 bg-black text-white text-xs tracking-widest uppercase ml-1 sm:ml-2">
+                        <span className="inline-block px-3 py-1 bg-black text-white text-xs tracking-wide font-light ml-2">
                           -{product.discountPercentage}%
                         </span>
                       )}
                     </div>
 
                     {/* Quick View */}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
-                      <span className="bg-white px-4 py-2 sm:px-6 sm:py-3 text-xs sm:text-sm tracking-widest uppercase">
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                      <span className="bg-white px-6 py-3 text-sm tracking-wide font-light">
                         Voir détails
                       </span>
                     </div>
                   </div>
 
                   {/* Info */}
-                  <div className="p-3 sm:p-4">
-                    <p className="text-xs tracking-widest uppercase mb-1 sm:mb-2" style={{ color: colors.lightGray }}>
+                  <div className="p-4">
+                    <p className="text-xs tracking-wide mb-2 font-light" style={{ color: colors.veryLightGray }}>
                       {product.category}
                     </p>
-                    <h3 className="text-sm sm:text-base lg:text-lg font-light mb-1 sm:mb-2 group-hover:text-gray-600 transition-colors line-clamp-1" style={{ color: colors.darkGray }}>
+                    <h3 className="text-base lg:text-lg font-light mb-2 group-hover:text-gray-600 transition-colors line-clamp-1" style={{ color: colors.darkGray }}>
                       {product.name}
                     </h3>
-                    <p className="text-xs sm:text-sm mb-2 sm:mb-3 text-gray-600 line-clamp-2" style={{ color: colors.mediumGray }}>
-                      {product.description}
-                    </p>
                     <div className="flex items-center">
-                      <span className="text-sm sm:text-base lg:text-lg font-light" style={{ color: colors.darkGray }}>
+                      <span className="text-base lg:text-lg font-light" style={{ color: colors.darkGray }}>
                         {formatPrice(product.price)}
                       </span>
                       {product.isSale && product.price < product.originalPrice && (
-                        <span className="ml-2 text-xs sm:text-sm line-through" style={{ color: colors.lightGray }}>
+                        <span className="ml-2 text-sm line-through font-light" style={{ color: colors.veryLightGray }}>
                           {formatPrice(product.originalPrice)}
                         </span>
                       )}
@@ -869,14 +1053,149 @@ const Detail = () => {
               ))}
           </div>
 
-          {/* View More Button for Mobile */}
-          {isMobile && productDetails.filter(p => p.id !== currentProduct.id).length > 2 && (
-            <div className="mt-8 text-center">
-              <button
-                onClick={() => navigate('/categories/robes')}
-                className="border border-black px-6 py-3 text-sm tracking-widest uppercase hover:bg-black hover:text-white transition-colors duration-300"
+          {/* Mobile Carousel - Un produit par slide */}
+          <div className="md:hidden relative">
+            <div
+              ref={carouselRef}
+              className="overflow-hidden"
+              onTouchStart={handleCarouselTouchStart}
+              onTouchMove={handleCarouselTouchEnd}
+              onTouchEnd={handleCarouselTouchEnd}
+            >
+              <div
+                className="flex transition-transform duration-300 ease-out"
+                style={{ transform: `translateX(-${currentSlide * 100}%)` }}
               >
-                Voir plus de robes
+                {similarProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    className="w-full flex-shrink-0 px-4"
+                  >
+                    <div
+                      className="group cursor-pointer bg-white hover:shadow-lg transition-shadow duration-300"
+                      onClick={() => navigateToProduct(product.id)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          navigateToProduct(product.id);
+                        }
+                      }}
+                      aria-label={`Voir les détails de ${product.name}`}
+                    >
+                      {/* Image */}
+                      <div className="relative overflow-hidden mb-4">
+                        <div className="h-[400px] overflow-hidden bg-gray-100">
+                          <img
+                            src={product.images[0]}
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
+                            }}
+                          />
+                        </div>
+
+                        {/* Badges */}
+                        <div className="absolute top-4 left-4 z-10">
+                          {product.isNew && (
+                            <span className="inline-block px-3 py-1 bg-white text-black text-xs tracking-wide font-light">
+                              Nouveau
+                            </span>
+                          )}
+                          {product.isSale && product.discountPercentage > 0 && (
+                            <span className="inline-block px-3 py-1 bg-black text-white text-xs tracking-wide font-light ml-2">
+                              -{product.discountPercentage}%
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Quick View */}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                          <span className="bg-white px-6 py-3 text-sm tracking-wide font-light">
+                            Voir détails
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Info */}
+                      <div className="p-4">
+                        <p className="text-xs tracking-wide mb-2 font-light" style={{ color: colors.veryLightGray }}>
+                          {product.category}
+                        </p>
+                        <h3 className="text-lg font-light mb-2 group-hover:text-gray-600 transition-colors line-clamp-1" style={{ color: colors.darkGray }}>
+                          {product.name}
+                        </h3>
+                        <p className="text-sm mb-3 text-gray-600 line-clamp-2 font-light" style={{ color: colors.mediumGray }}>
+                          {product.description}
+                        </p>
+                        <div className="flex items-center">
+                          <span className="text-lg font-light" style={{ color: colors.darkGray }}>
+                            {formatPrice(product.price)}
+                          </span>
+                          {product.isSale && product.price < product.originalPrice && (
+                            <span className="ml-2 text-sm line-through font-light" style={{ color: colors.veryLightGray }}>
+                              {formatPrice(product.originalPrice)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Navigation Arrows - Mobile Carousel */}
+            {currentSlide > 0 && (
+              <button
+                onClick={prevSlide}
+                className="absolute left-0 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center shadow-lg z-10 -ml-5"
+                aria-label="Produit précédent"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+              </button>
+            )}
+
+            {currentSlide < similarProducts.length - 1 && (
+              <button
+                onClick={nextSlide}
+                className="absolute right-0 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center shadow-lg z-10 -mr-5"
+                aria-label="Produit suivant"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+              </button>
+            )}
+
+            {/* Dots Indicator - Mobile Carousel */}
+            {similarProducts.length > 1 && (
+              <div className="flex justify-center space-x-2 mt-6">
+                {similarProducts.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`h-1.5 rounded-full transition-all ${currentSlide === index ? 'bg-black w-6' : 'bg-gray-300 w-1.5'
+                      }`}
+                    aria-label={`Aller au produit ${index + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* View More Button for Mobile */}
+          {isMobile && similarProducts.length > 1 && (
+            <div className="mt-10 text-center">
+              <button
+                onClick={() => navigate('/products')}
+                className="border border-black px-8 py-4 text-sm tracking-wide font-light hover:bg-black hover:text-white transition-colors duration-300"
+              >
+                Voir plus de produits
               </button>
             </div>
           )}
@@ -884,30 +1203,30 @@ const Detail = () => {
       </section>
 
       {/* Newsletter Section */}
-      <section className="py-12 sm:py-16 lg:py-24 border-t" style={{ borderColor: colors.border }}>
+      <section className="py-16 lg:py-24 border-t" style={{ borderColor: colors.border }}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-2xl">
           <div className="text-center">
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-light tracking-tight mb-4 sm:mb-6" style={{ color: colors.darkGray }}>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-light tracking-tight mb-6" style={{ color: colors.darkGray }}>
               La perfection dans chaque détail
             </h2>
-            <p className="mb-6 sm:mb-8 text-sm sm:text-base lg:text-lg" style={{ color: colors.mediumGray }}>
-              Recevez nos conseils d'experts pour choisir et entretenir vos robes, ainsi que l'accès exclusif aux nouvelles collections.
+            <p className="mb-8 text-base lg:text-lg font-light" style={{ color: colors.mediumGray }}>
+              Recevez nos conseils d'experts et l'accès exclusif aux nouvelles collections.
             </p>
-            <form className="flex flex-col sm:flex-row gap-3 sm:gap-4 max-w-md mx-auto">
+            <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
               <input
                 type="email"
                 placeholder="Votre adresse email"
-                className="flex-1 border-b border-black px-4 py-3 text-center text-xs sm:text-sm tracking-widest uppercase focus:outline-none focus:border-gray-400 bg-transparent"
+                className="flex-1 border-b border-black px-4 py-4 text-center text-sm tracking-wide font-light focus:outline-none focus:border-gray-400 bg-transparent"
                 required
               />
               <button
                 type="submit"
-                className="border rounded-[50px] border-black px-6 sm:px-8 py-3 text-xs sm:text-sm tracking-widest uppercase hover:bg-black hover:text-white transition-colors duration-300 whitespace-nowrap"
+                className="border rounded-full border-black px-8 py-4 text-sm tracking-wide font-light hover:bg-black hover:text-white transition-colors duration-300 whitespace-nowrap"
               >
                 S'inscrire
               </button>
             </form>
-            <p className="mt-4 sm:mt-6 text-xs" style={{ color: colors.lightGray }}>
+            <p className="mt-6 text-xs font-light" style={{ color: colors.veryLightGray }}>
               En vous inscrivant, vous acceptez notre politique de confidentialité. Désabonnement à tout moment.
             </p>
           </div>
