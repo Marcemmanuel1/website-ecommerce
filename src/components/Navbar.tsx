@@ -101,7 +101,8 @@ const Navbar: React.FC<NavbarProps> = ({ cartItemsCount, onCartClick }) => {
                   />
                 </svg>
               </button>
-              <button
+              <a
+                href='/login'
                 className="hover:text-gray-600 transition-colors"
                 aria-label="Compte"
                 style={{ color: colors.lightGray }}
@@ -120,7 +121,7 @@ const Navbar: React.FC<NavbarProps> = ({ cartItemsCount, onCartClick }) => {
                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                   />
                 </svg>
-              </button>
+              </a>
               <button
                 className="relative hover:text-gray-600 transition-colors"
                 onClick={handleCartClick}
