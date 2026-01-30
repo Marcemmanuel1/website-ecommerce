@@ -321,6 +321,7 @@ const Home = () => {
   };
 
   // Fonctions pour le slider des catégories
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const nextCategorySlide = () => {
     if (isCategoryTransitioning) return;
     setIsCategoryTransitioning(true);
@@ -728,7 +729,7 @@ const Home = () => {
             {categories.map((category) => (
               <a
                 key={category.id}
-                href={`/categories/${category.name.toLowerCase()}`}
+                href={`/collections/${category.id}`}
                 className="group relative overflow-hidden"
               >
                 <div className="h-[500px] overflow-hidden">

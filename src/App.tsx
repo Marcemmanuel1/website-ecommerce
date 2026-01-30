@@ -9,6 +9,7 @@ import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Collections from "./pages/Collections";
+import CollectionDetail from "./pages/CollectionDetail";
 function App() {
   return (
     <Router>
@@ -22,6 +23,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/collections" element={<Collections />} />
+        <Route path="/collections/:id" element={<CollectionDetail />} />
 
       </Routes>
     </Router>

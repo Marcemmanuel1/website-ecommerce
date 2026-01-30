@@ -50,7 +50,7 @@ const Collections = () => {
       title: "ARCHIVES COLLECTIONS",
       subtitle: "De 2020 à aujourd'hui",
       description: "Revivez l'évolution de notre maison à travers nos collections phares",
-      image: "/hero-section-un.jpg",
+      image: "/hero-collection-un.png",
       buttonText: "EXPLORER LES ARCHIVES",
       buttonLink: "/collections/archives"
     },
@@ -59,7 +59,7 @@ const Collections = () => {
       title: "COLLECTION PRINTEMPS-ÉTÉ 2026",
       subtitle: "En prévision",
       description: "Un avant-goût des créations à venir",
-      image: "/hero-section-deux.jpeg",
+      image: "/hero-section-deux.png",
       buttonText: "DÉCOUVRIR",
       buttonLink: "/collections/preview"
     },
@@ -68,7 +68,7 @@ const Collections = () => {
       title: "PIÈCES ICONIQUES",
       subtitle: "L'éternel réinventé",
       description: "Les modèles qui ont marqué l'histoire de la maison",
-      image: "/hero-section-trois.png",
+      image: "/hero-collection-trois.png",
       buttonText: "EXPLORER",
       buttonLink: "/collections/iconic"
     }
@@ -334,7 +334,7 @@ const Collections = () => {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <div className="relative h-[80vh] overflow-hidden">
+        <div className="relative h-[92vh] overflow-hidden">
           {heroSlides.map((slide, index) => (
             <div
               key={slide.id}
