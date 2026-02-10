@@ -27,7 +27,7 @@ export const calculateDiscountPercentage = (
   return Math.round(((originalPrice - salePrice) / originalPrice) * 100);
 };
 
-export const debounce = <T extends (...args: any[]) => any>(
+export const debounce = <T extends (...args: never[]) => never>(
   func: T,
   wait: number,
 ): ((...args: Parameters<T>) => void) => {
@@ -39,7 +39,7 @@ export const debounce = <T extends (...args: any[]) => any>(
   };
 };
 
-export const throttle = <T extends (...args: any[]) => any>(
+export const throttle = <T extends (...args: never[]) => never>(
   func: T,
   limit: number,
 ): ((...args: Parameters<T>) => void) => {

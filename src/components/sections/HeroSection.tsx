@@ -1,7 +1,6 @@
 import React from 'react';
 import type { HeroSlide } from '../../types';
 import { useSlider, useTouchSwipe } from '../../hooks';
-import { SliderNavigation } from '../ui/SliderNavigation';
 import { SliderIndicators } from '../ui/SliderIndicators';
 
 interface HeroSectionProps {
@@ -95,52 +94,35 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         ))}
       </div>
 
+      {/* Navigation identique sur mobile et desktop - Flèche gauche */}
       {showNavigation && slides.length > 1 && (
         <>
-          <SliderNavigation
-            onPrev={prevSlide}
-            onNext={nextSlide}
-            className="hidden md:block"
-          />
+          <button
+            onClick={prevSlide}
+            className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-colors z-10"
+            aria-label="Slide précédent"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 md:h-10 md:w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
 
-          {/* Navigation mobile avec flèches */}
-          <div className="md:hidden absolute bottom-8 left-1/2 transform -translate-x-1/2 flex items-center space-x-6">
-            <button
-              onClick={prevSlide}
-              className="text-white hover:text-gray-300 transition-colors"
-              aria-label="Slide précédent"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-
-            {showIndicators && (
-              <SliderIndicators
-                totalSlides={slides.length}
-                currentSlide={currentSlide}
-                onSlideClick={goToSlide}
-                variant="numbers"
-                activeColor="text-white"
-                inactiveColor="text-white/50"
-              />
-            )}
-
-            <button
-              onClick={nextSlide}
-              className="text-white hover:text-gray-300 transition-colors"
-              aria-label="Slide suivant"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </div>
+          {/* Navigation identique sur mobile et desktop - Flèche droite */}
+          <button
+            onClick={nextSlide}
+            className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-colors z-10"
+            aria-label="Slide suivant"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 md:h-10 md:w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
         </>
       )}
 
+      {/* Indicateurs en bas à gauche */}
       {showIndicators && slides.length > 1 && (
-        <div className="hidden md:block absolute bottom-8 md:bottom-12 left-4 md:left-8">
+        <div className="absolute bottom-8 md:bottom-12 left-4 md:left-8">
           <SliderIndicators
             totalSlides={slides.length}
             currentSlide={currentSlide}

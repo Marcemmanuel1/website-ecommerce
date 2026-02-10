@@ -3,7 +3,6 @@ import type { Product } from '../../types';
 import { useSlider, useHorizontalScroll, useTouchSwipe, useCart } from '../../hooks';
 import { ProductCard } from '../ui/ProductCard';
 import { ScrollNavigation } from '../ui/ScrollNavigation';
-import { SliderNavigation } from '../ui/SliderNavigation';
 import { SliderIndicators } from '../ui/SliderIndicators';
 import { goToProductDetail } from '../../utils';
 
@@ -84,7 +83,7 @@ export const SignatureSection: React.FC<SignatureSectionProps> = ({ products }) 
             onScrollRight={() => scrollRight()}
             showLeft={showScrollLeft}
             showRight={showScrollRight}
-            className="-translate-x-4 translate-x-4"
+            className="-translate-x-1 translate-x-0"
           />
 
           <div
@@ -133,15 +132,15 @@ export const SignatureSection: React.FC<SignatureSectionProps> = ({ products }) 
               ))}
             </div>
 
-            {/* Mobile Navigation */}
+            {/* Mobile Navigation - Utilise ScrollNavigation au lieu de SliderNavigation */}
             {products.length > 1 && (
               <>
-                <SliderNavigation
-                  onPrev={prevSlide}
-                  onNext={nextSlide}
-                  className="md:hidden"
-                  iconSize="h-5 w-5"
-                  position="inside"
+                <ScrollNavigation
+                  onScrollLeft={prevSlide}
+                  onScrollRight={nextSlide}
+                  showLeft={currentSlide > 0}
+                  showRight={currentSlide < products.length - 1}
+                  className="-translate-x-1 translate-x-0"
                 />
 
                 <SliderIndicators
