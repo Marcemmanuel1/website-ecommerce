@@ -5,7 +5,7 @@ import type {
   User,
 } from "../types/auth";
 
-// Vite utilise import.meta.env au lieu de process.env
+// Correction pour Vite
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 

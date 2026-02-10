@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import type { RegisterFormData } from '../../types/auth';
 import { useAuth } from '../../hooks/useAuth';
 import { validateRegisterForm } from '../../utils/validation';
@@ -9,10 +9,9 @@ interface RegisterFormProps {
   onRegistered?: (userData: never) => void;
 }
 
-const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onRegistered }) => {
+const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
   const { register, isLoading } = useAuth();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const navigate = useNavigate();
   const [formData, setFormData] = useState<RegisterFormData>({
     firstName: '',
     lastName: '',
@@ -63,7 +62,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onRegistered }) 
 
       // rappels de succès d'appel
       if (onSuccess) onSuccess();
-      if (onRegistered && result.data) onRegistered(result.data.user);
     } else if (result.errors) {
       setErrors(result.errors);
     }
